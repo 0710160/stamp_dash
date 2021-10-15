@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Add New Job{% endblock %}
+{% block content %}
+
+<div class="">
+
+    <h1 class="heading">Add a job to the schedule</h1>
+
+    <form action="" method="POST">
+        <label>Job number:</label>
+        <input type="text", name="job_no">
+        <label>Job name:</label>
+        <input type="text", name="job_name">
+        <label>Due date:</label>
+        <input type="date", name="due_date">
+        <button type="submit">Add job</button>
+    </form>
+
+    <a href="{{ url_for('home') }}">Return home</a>
+</div>
+
+{% endblock %}

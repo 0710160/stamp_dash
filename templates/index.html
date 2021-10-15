@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Production Schedule{% endblock %}
+{% block content %}
+
+<h1>Production Schedule</h1>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">Job No.</th>
+        <th scope="col">Job Description</th>
+        <th scope="col">Due Date</th>
+        <th scope="col">Complete Job</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    {% for job in all_jobs %}
+    <tr>
+        <td>{{ job.job_no }}</td>
+        <td>{{ job.job_name }}</td>
+        <td>{{ job.due_date }}</td>
+        <td><a href="/complete/{{ job.job_no }}">Complete</a></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ url_for('add') }}">Add new job</a>
+
+{% endblock %}
