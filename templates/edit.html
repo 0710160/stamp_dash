@@ -1,10 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Edit Job</title>
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito+Sans:300,400,700">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,700">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css"/>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/styles.css">
 </head>
+
 <body>
-$END$
+
+<div class="">
+
+    <h1 class="heading">Editing job number {{ job.job_no }}</h1>
+    <h3 class="subheading>">Current due date: {{ job.due_date }}</h3>
+    <h3 class="subheading>">Current priority: {{ job.priority }}</h3>
+
+    <hr>
+
+    <form action="" method="POST">
+        <label>Due date:</label>
+        <input type="date", name="new_due_date", placeholder="{{ job.due_date }}">
+        <label>Priority:</label>
+        <input type="number", name="new_priority", placeholder="{{ job.priority }}">
+        <button type="submit">Submit changes</button>
+    </form>
+
+    <a href="{{ url_for('home') }}">Return home</a>
+</div>
+
 </body>
 </html>

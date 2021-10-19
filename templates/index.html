@@ -1,6 +1,19 @@
-{% extends "base.html" %}
-{% block title %}Production Schedule{% endblock %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="60">  <!-- forces refresh every minute -->
+    <title>Production Schedule</title>
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito+Sans:300,400,700">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,700">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css"/>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="static/css/styles.css">
+</head>
+
+<body>
 
 <h1>Production Schedule</h1>
 
@@ -10,6 +23,8 @@
         <th scope="col">Job No.</th>
         <th scope="col">Job Description</th>
         <th scope="col">Due Date</th>
+        <th scope="col">Priority (1=highest)</th>
+        <th scope="col">Plates Made?</th>
         <th scope="col">Complete Job</th>
     </tr>
     </thead>
@@ -17,10 +32,17 @@
     <tbody>
     {% for job in all_jobs %}
     <tr>
-        <td>{{ job.job_no }}</td>
+        <td><a href="/edit/{{ job.id }}">{{ job.job_no }}</a></td>
         <td>{{ job.job_name }}</td>
         <td>{{ job.due_date }}</td>
-        <td><a href="/complete/{{ job.job_no }}">Complete</a></td>
+        <td>{{ job.priority }}
+            <div class="up-down">
+                <a href="/priority_up/{{ job.id }}">Move Up /</a>
+                <a href="/priority_down/{{ job.id }}"> Down</a>
+            </div>
+        </td>
+        <td><a href="plates/{{ job.id }}">{{ job.plates_made }}</a></td>
+        <td><a href="/complete/{{ job.id }}">Complete</a></td>
     </tr>
     {% endfor %}
     </tbody>
@@ -28,4 +50,5 @@
 
 <a href="{{ url_for('add') }}">Add new job</a>
 
-{% endblock %}
+</body>
+</html>
