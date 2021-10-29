@@ -1,0 +1,24 @@
+body {
+  font-family: 'Roboto', sans-serif;
+  }
+
+h1 {
+  font-weight: 900;
+  font-size: 1.8em;
+  margin-top: 8px;
+  background: linear-gradient(to bottom right, #2EF2C0, #D139F0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  }
+
+.container-flex {
+    padding: 20px;
+    }
+
+.chevron {
+  width: 8px;
+  margin: 0 0 0 10px;
+}
+
+.notes {
+  font-style: italic;}
