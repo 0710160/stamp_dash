@@ -9,7 +9,7 @@ from telegram_bot import TelegramBot
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = "65K1Ax8pWqbNMkTkMJuY"
+app.config['SECRET_KEY'] = "$65K1Ax8pWqbNMkTkMJuY"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///production_schedule.sqlite3'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 Bootstrap(app)
@@ -31,7 +31,7 @@ class Jobs(db.Model):
     job_no = db.Column(db.String, nullable=False)
     job_name = db.Column(db.String(250), nullable=False)
     due_date = db.Column(db.Date)
-    priority = db.Column(db.Float, default=4)
+    priority = db.Column(db.Float, default=9)
     plates_made = db.Column(db.Boolean, default=False)
     scheduled = db.Column(db.Boolean, default=False)
     approved = db.Column(db.Boolean, default=False)
@@ -43,7 +43,13 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250))
     password = db.Column(db.String(100))
-    rights = db.Column(db.Integer, default=False)  #1 is admin, 2 can complete, 3 can plates, etc
+    rights = db.Column(db.Integer, default=0)  #0 is read-only, 5 is admin
+
+
+class Log(db.Model):
+    ''' Creates a DB for user action logs '''
+    id = db.Column(db.Integer, primary_key=True)
+    action = db.Column(db.String(100))
 
 
 db.create_all()
@@ -59,17 +65,21 @@ def refresh_priority():
     db.session.commit()
 
 
-def auth(id):
+def auth(user, action, job):
     '''
     Function to check if user is authorized to perform an action.
         5 = Admin (all rights)
-        4 = Sort, Edit
-        3 = Approve, Add New Job
-        2 = Plates
+        4 = _
+        3 = Sort, Edit, Approve
+        2 = Plates, Add New Job
         1 = Complete
         0 = Read only
+    Logs actions to log.db
     '''
-    auth_user = User.query.get(id)
+    auth_user = User.query.get(user)
+    log_action = Log(action=f"User {auth_user.name} {action} job {job}")
+    db.session.add(log_action)
+    db.session.commit()
     return auth_user.rights
 
 
@@ -84,7 +94,7 @@ def home():
 @login_required
 def add():
     # Currently manually adds jobs, later will import automatically from SQL
-    if auth(current_user.id) >= 3:
+    if auth(user=current_user.id, action="added", job="{new}") >= 2:
         if request.method == "GET":
             return render_template("add.html")
         else:
@@ -95,6 +105,7 @@ def add():
             add_job = Jobs(job_no=job_no, job_name=job_name, due_date=due_date)
             db.session.add(add_job)
             db.session.commit()
+            refresh_priority()
             all_jobs = Jobs.query.order_by(Jobs.priority).all()
             return redirect(url_for("home", all_jobs=all_jobs))
     else:
@@ -106,12 +117,11 @@ def add():
 @login_required
 def edit(job_id):
     # Allows select users to edit the priority of jobs which influences sort order
-    if auth(current_user.id) >= 4:
+    edit_job = Jobs.query.get(job_id)
+    if auth(user=current_user.id, action="edited", job=edit_job.job_no) >= 3:
         if request.method == "GET":
-            edit_job = Jobs.query.get(job_id)
             return render_template("edit.html", job=edit_job, logged_in=current_user.is_authenticated)
         else:
-            edit_job = Jobs.query.get(job_id)
             if request.form["new_due_date"] == "":
                 pass
             else:
@@ -141,8 +151,8 @@ def edit(job_id):
 @login_required
 def complete(job_id):
     # Removes a job from the database
-    if auth(current_user.id) >= 1:
-        delete_job = Jobs.query.get(job_id)
+    delete_job = Jobs.query.get(job_id)
+    if auth(user=current_user.id, action="completed", job=delete_job.job_no) >= 1:
         db.session.delete(delete_job)
         db.session.commit()
     else:
@@ -155,8 +165,8 @@ def complete(job_id):
 @login_required
 def priority_up(job_id):
     # Increases priority
-    if auth(current_user.id) >= 4:
-        priority_edit = Jobs.query.get(job_id)
+    priority_edit = Jobs.query.get(job_id)
+    if auth(user=current_user.id, action="increased priority on", job=priority_edit.job_no) >= 3:
         priority_edit.priority -= 1.5
         db.session.commit()
         refresh_priority()
@@ -170,8 +180,8 @@ def priority_up(job_id):
 @login_required
 def priority_down(job_id):
     # Decreases priority
-    if auth(current_user.id) >= 4:
-        priority_edit = Jobs.query.get(job_id)
+    priority_edit = Jobs.query.get(job_id)
+    if auth(user=current_user.id, action="decreased priority on", job=priority_edit.job_no) >= 3:
         priority_edit.priority += 1.5
         db.session.commit()
         refresh_priority()
@@ -185,8 +195,8 @@ def priority_down(job_id):
 @login_required
 def plates(job_id):
     # Saves checkbox
-    if auth(current_user.id) >= 2:
-        job = Jobs.query.get(job_id)
+    job = Jobs.query.get(job_id)
+    if auth(user=current_user.id, action="plates made for", job=job.job_no) >= 2:
         if job.plates_made:
             job.plates_made = False
         else:
@@ -202,8 +212,8 @@ def plates(job_id):
 @login_required
 def approved(job_id):
     # Saves checkbox
-    if auth(current_user.id) >= 3:
-        job = Jobs.query.get(job_id)
+    job = Jobs.query.get(job_id)
+    if auth(user=current_user.id, action="approved", job=job.job_no) >= 3:
         if job.approved:
             job.approved = False
         else:

@@ -27,7 +27,11 @@
 
     <tbody>
     {% for job in all_jobs %}
+    {% if job.approved == True and job.plates_made == True %}
+    <tr style="background-color: #EEEEEE;">
+    {% else %}
     <tr>
+        {% endif %}
         <td><a href="/priority_up/{{ job.id }}"><img src="{{ url_for('static', filename='up-chevron.png') }}", class="chevron"/></a><a href="/priority_down/{{ job.id }}"><p>  </p><img src="{{ url_for('static', filename='down-chevron.png') }}", class="chevron"/></a></td>
         <td><a href="/edit/{{ job.id }}">{{ job.job_no }}</a></td>
         <td><p>{{ job.job_name }}</p>
@@ -38,7 +42,7 @@
         <td><p>{{ job.due_date }}</p></td>
         <td><a href="approved/{{ job.id }}">{{ job.approved }}</a></td>
         <td><a href="plates/{{ job.id }}">{{ job.plates_made }}</a></td>
-        <td><a href="/complete/{{ job.id }}">Complete</a></td>
+        <td><a href="/complete/{{ job.id }}">Click to Complete</a></td>
     </tr>
     {% endfor %}
     </tbody>

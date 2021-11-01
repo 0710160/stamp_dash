@@ -1,21 +1,23 @@
 :root {
-  --heading-color: #204452;
-  --text-color: #DCF6FA;
+  --heading-color: #334257;
+  --a-color: #548CA8;
+  --bg-color: #FFF;
+  --text-color: #334257;
   }
 
 body {
   font-family: 'Roboto', sans-serif;
-  background-color: rgba(82,174,208,82);
+  background-color: var(--bg-color);
   }
 
 h1 {
-  font-weight: 900;
+  font-weight: 700;
   font-size: 1.8em;
   margin-top: 8px;
   /*background: linear-gradient(to bottom right, #2EF2C0, #D139F0);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;*/
-  color: var(--heading-color);
+  color: #06038D;
   }
 
 h2 {
@@ -31,7 +33,7 @@ h4 {
 
 a {
   font-size: 1.2em;
-  color: var(--text-color);
+  color: var(--a-color);
 }
 
 p {
