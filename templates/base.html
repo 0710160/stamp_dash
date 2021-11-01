@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='favicon.png') }}" sizes="180x180">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" sizes="32x32" type="image/png">
     <title>Production Schedule</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,7 +24,7 @@
     </a>
     <h1>Southern Colour Print Production Schedule</h1>
   <div class="collapse navbar-collapse">
-    <ul class="navbar-nav ml-auto">
+    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('home') }}">Home</a>
       </li>
@@ -33,10 +35,15 @@
         <li class="nav-item">
         <a class="nav-link" href="/new_user">New User</a>
       </li>
+        <li class="nav-item">
+            <a class="nav-link disabled">Admin</a>
+            {% else %}
+            <a class="nav-link" href="/admin">Admin</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/logout">Log Out</a>
+        </li>
         {% endif %}
-      <li class="nav-item">
-        <a class="nav-link" href="/logout">Log Out</a>
-      </li>
     </ul>
 
 

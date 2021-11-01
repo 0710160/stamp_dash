@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container-flex blue-bg">
+
+    <h2 class="heading">Admin: Edit User</h2>
+    <hr>
+
+    <form action="" method="POST">
+        <label>User name:</label>
+        <input type="text", style="width:100px;", name="name">
+        <label>Access rights:</label>
+        <input type="text", style="width:50px;" name="rights">
+        <br>
+        <button class="btn btn-dark buttons" type="submit">Edit User</button>
+        <a class="btn btn-secondary buttons" href="{{ url_for('home') }}">Return Home</a>
+    </form>
+    <br><br><hr><br>
+    <ul>
+        <h3>Rights definitions:</h3>
+        <li>5 = Admin (all rights)</li>
+        <li>4 = __</li>
+        <li>3 = Sort, Edit, Approve</li>
+        <li>2 = Plates, Add New Job</li>
+        <li>1 = Complete</li>
+        <li>0 = Read Only</li>
+    </ul>
+</div>
+
+{% endblock %}

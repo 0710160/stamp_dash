@@ -9,7 +9,7 @@ from telegram_bot import TelegramBot
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = "$65K1Ax8pWqbNMkTkMJuY"
+app.config['SECRET_KEY'] = "5K1Ax8pWqbNMkTkMJuY"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///production_schedule.sqlite3'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 Bootstrap(app)
@@ -109,6 +109,7 @@ def add():
             all_jobs = Jobs.query.order_by(Jobs.priority).all()
             return redirect(url_for("home", all_jobs=all_jobs))
     else:
+        flash("You are not authorized to perform this action.")
         all_jobs = Jobs.query.order_by(Jobs.priority).all()
         return redirect(url_for("home", all_jobs=all_jobs))
 
@@ -276,6 +277,26 @@ def logout():
     logout_user()
     all_jobs = Jobs.query.order_by(Jobs.priority).all()
     return redirect(url_for("home", all_jobs=all_jobs))
+
+
+@app.route("/admin", methods=["GET", "POST"])
+@login_required
+def admin():
+    if auth(user=current_user.id, action="accessed admin page;", job="N/A") >= 5:
+        if request.method == "GET":
+            return render_template("admin.html", logged_in=current_user.is_authenticated)
+        else:
+            name = request.form["name"]
+            user = db.session.query(User).filter_by(name=name).first()
+            rights = int(request.form["rights"])
+            user.rights = rights
+            db.session.commit()
+            all_jobs = Jobs.query.order_by(Jobs.priority).all()
+            return render_template("index.html", all_jobs=all_jobs, logged_in=current_user.is_authenticated)
+    else:
+        flash("You are not authorized to perform this action.")
+        all_jobs = Jobs.query.order_by(Jobs.priority).all()
+        return render_template("index.html", all_jobs=all_jobs, logged_in=current_user.is_authenticated)
 
 
 @app.errorhandler(401)
