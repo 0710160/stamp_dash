@@ -1,10 +1,17 @@
 {% extends "base.html" %}
-{{ super() }}
-<meta http-equiv="refresh" content="60">  <!-- forces refresh every minute -->
-
 {% block content %}
 
-<div class="container-flex">
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul class=flashes>
+    {% for message in messages %}
+    {{ message }}
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+
+<div class="container-flex blue-bg">
 <table class="table">
     <thead>
     <tr>
@@ -23,12 +30,12 @@
     <tr>
         <td><a href="/priority_up/{{ job.id }}"><img src="{{ url_for('static', filename='up-chevron.png') }}", class="chevron"/></a><a href="/priority_down/{{ job.id }}"><p>  </p><img src="{{ url_for('static', filename='down-chevron.png') }}", class="chevron"/></a></td>
         <td><a href="/edit/{{ job.id }}">{{ job.job_no }}</a></td>
-        <td>{{ job.job_name }}<br>
+        <td><p>{{ job.job_name }}</p>
             {% if job.notes %}
             <p class="notes">Notes: {{ job.notes }}</p>
             {% endif %}
         </td>
-        <td>{{ job.due_date }}</td>
+        <td><p>{{ job.due_date }}</p></td>
         <td><a href="approved/{{ job.id }}">{{ job.approved }}</a></td>
         <td><a href="plates/{{ job.id }}">{{ job.plates_made }}</a></td>
         <td><a href="/complete/{{ job.id }}">Complete</a></td>
@@ -37,6 +44,6 @@
     </tbody>
 </table>
 
-<a href="{{ url_for('add') }}">Add new job</a>
+<a class="add-new" href="{{ url_for('add') }}">Add new job</a>
 </div>
 {% endblock %}

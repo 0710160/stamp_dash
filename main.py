@@ -3,12 +3,15 @@ from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.exceptions import HTTPException
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
+from telegram_bot import TelegramBot
 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "65K1Ax8pWqbNMkTkMJuY"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///production_schedule.sqlite3'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 Bootstrap(app)
 db = SQLAlchemy(app)
 
@@ -42,6 +45,7 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(100))
     rights = db.Column(db.Integer, default=False)  #1 is admin, 2 can complete, 3 can plates, etc
 
+
 db.create_all()
 
 
@@ -55,6 +59,20 @@ def refresh_priority():
     db.session.commit()
 
 
+def auth(id):
+    '''
+    Function to check if user is authorized to perform an action.
+        5 = Admin (all rights)
+        4 = Sort, Edit
+        3 = Approve, Add New Job
+        2 = Plates
+        1 = Complete
+        0 = Read only
+    '''
+    auth_user = User.query.get(id)
+    return auth_user.rights
+
+
 @app.route("/")
 def home():
     # Displays all incomplete jobs and orders by priority
@@ -66,57 +84,69 @@ def home():
 @login_required
 def add():
     # Currently manually adds jobs, later will import automatically from SQL
-    if request.method == "POST":
-        job_no = request.form["job_no"]
-        job_name = request.form["job_name"]
-        due_date = (request.form["due_date"])
-        due_date = datetime.strptime(due_date, "%Y-%m-%d")
-        add_job = Jobs(job_no=job_no, job_name=job_name, due_date=due_date)
-        db.session.add(add_job)
-        db.session.commit()
+    if auth(current_user.id) >= 3:
+        if request.method == "GET":
+            return render_template("add.html")
+        else:
+            job_no = request.form["job_no"]
+            job_name = request.form["job_name"]
+            due_date = (request.form["due_date"])
+            due_date = datetime.strptime(due_date, "%Y-%m-%d")
+            add_job = Jobs(job_no=job_no, job_name=job_name, due_date=due_date)
+            db.session.add(add_job)
+            db.session.commit()
+            all_jobs = Jobs.query.order_by(Jobs.priority).all()
+            return redirect(url_for("home", all_jobs=all_jobs))
+    else:
         all_jobs = Jobs.query.order_by(Jobs.priority).all()
         return redirect(url_for("home", all_jobs=all_jobs))
-    else:
-        return render_template("add.html")
 
 
 @app.route("/edit/<job_id>", methods=["GET", "POST"])
 @login_required
 def edit(job_id):
     # Allows select users to edit the priority of jobs which influences sort order
-    if request.method == "POST":
-        edit_job = Jobs.query.get(job_id)
-        if request.form["new_due_date"] == "":
-            pass
+    if auth(current_user.id) >= 4:
+        if request.method == "GET":
+            edit_job = Jobs.query.get(job_id)
+            return render_template("edit.html", job=edit_job, logged_in=current_user.is_authenticated)
         else:
-            new_due_date = request.form["new_due_date"]
-            new_due_date = datetime.strptime(new_due_date, "%Y-%m-%d")
-            edit_job.due_date = new_due_date
-        if request.form["new_priority"] == "":
-            pass
-        else:
-            new_priority = request.form["new_priority"]
-            edit_job.priority = new_priority
-        if request.form["notes"] == "":
-            pass
-        else:
-            notes = request.form["notes"]
-            edit_job.notes = notes
-        db.session.commit()
+            edit_job = Jobs.query.get(job_id)
+            if request.form["new_due_date"] == "":
+                pass
+            else:
+                new_due_date = request.form["new_due_date"]
+                new_due_date = datetime.strptime(new_due_date, "%Y-%m-%d")
+                edit_job.due_date = new_due_date
+            if request.form["new_priority"] == "":
+                pass
+            else:
+                new_priority = request.form["new_priority"]
+                edit_job.priority = new_priority
+            if request.form["notes"] == "":
+                pass
+            else:
+                notes = request.form["notes"]
+                edit_job.notes = notes
+            db.session.commit()
+            all_jobs = Jobs.query.order_by(Jobs.priority).all()
+            return redirect(url_for("home", all_jobs=all_jobs, logged_in=current_user.is_authenticated))
+    else:
+        flash("You are not authorized to perform this action.")
         all_jobs = Jobs.query.order_by(Jobs.priority).all()
         return redirect(url_for("home", all_jobs=all_jobs, logged_in=current_user.is_authenticated))
-    else:
-        edit_job = Jobs.query.get(job_id)
-        return render_template("edit.html", job=edit_job, logged_in=current_user.is_authenticated)
 
 
 @app.route("/complete/<job_id>")
 @login_required
 def complete(job_id):
     # Removes a job from the database
-    delete_job = Jobs.query.get(job_id)
-    db.session.delete(delete_job)
-    db.session.commit()
+    if auth(current_user.id) >= 1:
+        delete_job = Jobs.query.get(job_id)
+        db.session.delete(delete_job)
+        db.session.commit()
+    else:
+        flash("You are not authorized to perform this action.")
     all_jobs = Jobs.query.order_by(Jobs.priority).all()
     return redirect(url_for("home", all_jobs=all_jobs, logged_in=current_user.is_authenticated))
 
@@ -124,12 +154,14 @@ def complete(job_id):
 @app.route("/priority_up/<job_id>")
 @login_required
 def priority_up(job_id):
-    ##TODO: need to restrict this to admins
     # Increases priority
-    priority_edit = Jobs.query.get(job_id)
-    priority_edit.priority -= 1.5
-    db.session.commit()
-    refresh_priority()
+    if auth(current_user.id) >= 4:
+        priority_edit = Jobs.query.get(job_id)
+        priority_edit.priority -= 1.5
+        db.session.commit()
+        refresh_priority()
+    else:
+        flash("You are not authorized to perform this action.")
     all_jobs = Jobs.query.order_by(Jobs.priority).all()
     return redirect(url_for("home", all_jobs=all_jobs, logged_in=current_user.is_authenticated))
 
@@ -138,10 +170,13 @@ def priority_up(job_id):
 @login_required
 def priority_down(job_id):
     # Decreases priority
-    priority_edit = Jobs.query.get(job_id)
-    priority_edit.priority += 1.5
-    db.session.commit()
-    refresh_priority()
+    if auth(current_user.id) >= 4:
+        priority_edit = Jobs.query.get(job_id)
+        priority_edit.priority += 1.5
+        db.session.commit()
+        refresh_priority()
+    else:
+        flash("You are not authorized to perform this action.")
     all_jobs = Jobs.query.order_by(Jobs.priority).all()
     return redirect(url_for("home", all_jobs=all_jobs, logged_in=current_user.is_authenticated))
 
@@ -150,12 +185,15 @@ def priority_down(job_id):
 @login_required
 def plates(job_id):
     # Saves checkbox
-    job = Jobs.query.get(job_id)
-    if job.plates_made:
-        job.plates_made = False
+    if auth(current_user.id) >= 2:
+        job = Jobs.query.get(job_id)
+        if job.plates_made:
+            job.plates_made = False
+        else:
+            job.plates_made = True
+        db.session.commit()
     else:
-        job.plates_made = True
-    db.session.commit()
+        flash("You are not authorized to perform this action.")
     all_jobs = Jobs.query.order_by(Jobs.priority).all()
     return redirect(url_for("home", all_jobs=all_jobs, logged_in=current_user.is_authenticated))
 
@@ -164,12 +202,15 @@ def plates(job_id):
 @login_required
 def approved(job_id):
     # Saves checkbox
-    job = Jobs.query.get(job_id)
-    if job.approved:
-        job.approved = False
+    if auth(current_user.id) >= 3:
+        job = Jobs.query.get(job_id)
+        if job.approved:
+            job.approved = False
+        else:
+            job.approved = True
+        db.session.commit()
     else:
-        job.approved = True
-    db.session.commit()
+        flash("You are not authorized to perform this action.")
     all_jobs = Jobs.query.order_by(Jobs.priority).all()
     return redirect(url_for("home", all_jobs=all_jobs, logged_in=current_user.is_authenticated))
 
@@ -195,8 +236,9 @@ def new_user():
         else:
             db.session.add(new_db_entry)
             db.session.commit()
-            login_user(new_user, remember=True)
+            login_user(new_db_entry, remember=True)
             all_jobs = Jobs.query.order_by(Jobs.priority).all()
+            TelegramBot.send_text(f"New user {name} created.")
             return redirect(url_for("home", all_jobs=all_jobs, logged_in=current_user.is_authenticated))
 
 
@@ -232,5 +274,17 @@ def auth_401(error):
     return render_template("login.html"), 401
 
 
+@app.errorhandler(500)
+def special_exception_handler(error):
+    if isinstance(error, HTTPException):
+        error_debug = {
+            "code": error.code,
+            "name": error.name,
+            "description": error.description
+        }
+    TelegramBot.send_text(error_debug)
+    return "Database error. A notification has been sent to the administrator.", 500
+
+
 if __name__ == "__main__":
-    app.run(host="10.0.1.26", port="5959", debug=True)
+    app.run()

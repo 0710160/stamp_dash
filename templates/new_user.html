@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="box container-flex">
+<div class="box container-flex blue-bg">
 	<h2>Register New User</h2>
         {% with messages = get_flashed_messages() %}
         {% if messages %}
         <ul class=flashes>
             {% for message in messages %}
-            <p>{{ message }}</p>
+            {{ message }}
             {% endfor %}
         </ul>
         {% endif %}
@@ -15,9 +15,10 @@
     <form action="{{ url_for('new_user') }}" method="post">
     	<input type="text" name="name" placeholder="Name" required="required" />
         <input type="password" name="password" placeholder="Password" required="required" />
-        <br><br>
-        <button type="submit" class="btn btn-primary">Register</button>
+        <br>
+        <button type="submit" class="btn btn-light buttons">Register</button>
     </form>
+    <h4>Once submitted, a request will be sent to the administrator for approval.</h4>
 </div>
 
 {% endblock %}

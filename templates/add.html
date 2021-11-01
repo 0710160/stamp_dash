@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="container-flex">
+<div class="container-flex blue-bg">
 
     <h2 class="heading">Add a job to the schedule</h2>
     <hr>
@@ -19,7 +19,7 @@
         <br>
         <textarea maxlength="249" , style="width:625px; height:100px;", name="notes"></textarea>
         <hr>
-        <button class="btn btn-primary" type="submit">Add Job</button>
+        <button class="btn btn-light buttons" type="submit">Add Job</button>
     </form>
     <br>
     <a href="{{ url_for('home') }}">Return home</a>

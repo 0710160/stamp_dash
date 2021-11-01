@@ -1,14 +1,52 @@
+:root {
+  --heading-color: #204452;
+  --text-color: #DCF6FA;
+  }
+
 body {
   font-family: 'Roboto', sans-serif;
+  background-color: rgba(82,174,208,82);
   }
 
 h1 {
   font-weight: 900;
   font-size: 1.8em;
   margin-top: 8px;
-  background: linear-gradient(to bottom right, #2EF2C0, #D139F0);
+  /*background: linear-gradient(to bottom right, #2EF2C0, #D139F0);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  -webkit-text-fill-color: transparent;*/
+  color: var(--heading-color);
+  }
+
+h2 {
+  font-size: 1.5em;
+  color: var(--heading-color);
+  }
+
+h4 {
+  margin-top: 12px;
+  font-size: 1.2em;
+  color: var(--text-color);
+  }
+
+a {
+  font-size: 1.2em;
+  color: var(--text-color);
+}
+
+p {
+  font-size: 1.2em;
+  color: var(--text-color);
+  padding: 0;
+  }
+
+th {
+  font-size: 1.2em;
+  color: var(--heading-color);
+  }
+
+label {
+  color: var(--text-color);
   }
 
 .container-flex {
@@ -21,4 +59,17 @@ h1 {
 }
 
 .notes {
-  font-style: italic;}
+  font-style: italic;
+  }
+
+.buttons {
+  margin-top: 10px;
+  }
+
+.flashes {
+  color: #384B52;
+}
+
+.add-new {
+  color: var(--heading-color;
+  }
