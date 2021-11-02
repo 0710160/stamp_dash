@@ -6,6 +6,9 @@
   }
 
 body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   font-family: 'Roboto', sans-serif;
   background-color: var(--bg-color);
   }
@@ -55,13 +58,10 @@ label {
     padding: 20px;
     }
 
-.chevron {
-  width: 8px;
-  margin: 0 0 0 10px;
-}
-
 .notes {
   font-style: italic;
+  color: var(--a-color);
+  margin-top: -10px;
   }
 
 .buttons {

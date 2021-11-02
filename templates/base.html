@@ -13,6 +13,8 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">    <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- FontAwesome -->
+    <script src="https://kit.fontawesome.com/57fb702c7e.js" crossorigin="anonymous"></script>
 
     <meta http-equiv="refresh" content="600">  <!-- forces refresh every ten minutes -->
 
@@ -52,5 +54,7 @@
        {% block content %}
        {% endblock %}
 </body>
-
+<footer style="margin-top:auto;font-size:0.8em;padding-top:20px;">
+    <p class="text-center text-muted border-top sig">2021 Matt Tobin, Southern Colour Print</p>
+</footer>
 </html>

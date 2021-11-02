@@ -5,7 +5,8 @@
 
     <h2 class="heading">Admin: Edit User</h2>
     <hr>
-
+    <div class="row">
+        <div class="col-6 col-sm-3">
     <form action="" method="POST">
         <label>User name:</label>
         <input type="text", style="width:100px;", name="name">
@@ -15,7 +16,8 @@
         <button class="btn btn-dark buttons" type="submit">Edit User</button>
         <a class="btn btn-secondary buttons" href="{{ url_for('home') }}">Return Home</a>
     </form>
-    <br>
+            </div>
+        <div class="col-6 col-sm-3">
     <h2>Rights definitions:</h2>
     <ul>
         <li>5 = Admin (all rights)</li>
@@ -25,9 +27,11 @@
         <li>1 = Complete</li>
         <li>0 = Read Only</li>
     </ul>
+            </div>
+        </div>
     <br><hr>
     <h2>User Action Log:</h2>
-    <div style="height:330px;width:60vw;overflow:auto;">
+    <div style="height:300px;width:700px;overflow:auto;">
         {% for log in all_logs %}
             <ul>{{ log.timestamp}} - {{ log.action }}</ul>
         {% endfor %}

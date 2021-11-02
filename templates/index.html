@@ -15,8 +15,7 @@
 <table class="table">
     <thead>
     <tr>
-        <th scope="col">Sort</th>
-        <th scope="col">Job No.</th>
+        <th scope="col">Job No. (Sort)</th>
         <th scope="col">Job Description</th>
         <th scope="col">Due Date</th>
         <th scope="col">Approved?</th>
@@ -32,14 +31,17 @@
     {% else %}
     <tr>
         {% endif %}
-        <td><a href="/priority_up/{{ job.id }}"><img src="{{ url_for('static', filename='up-chevron.png') }}", class="chevron"/></a><a href="/priority_down/{{ job.id }}"><p>  </p><img src="{{ url_for('static', filename='down-chevron.png') }}", class="chevron"/></a></td>
-        <td><a href="/edit/{{ job.id }}">{{ job.job_no }}</a></td>
+        <td>
+            <a href="/priority_up/{{ job.id }}"><i class="fas fa-chevron-up"></i></a>
+            <a href="/edit/{{ job.id }}"> {{ job.job_no }} </a>
+            <a href="/priority_down/{{ job.id }}"><i class="fas fa-chevron-down"></i></a>
+        </td>
         <td><p>{{ job.job_name }}</p>
             {% if job.notes %}
-            <p class="notes">Notes: {{ job.notes }}</p>
+            <p class="notes">  Notes: {{ job.notes }}</p>
             {% endif %}
         </td>
-        <td><p>{{ job.due_date }}</p></td>
+        <td><p>{{ job.due_date | datefilter }}</p></td>
         <td><a href="approved/{{ job.id }}">{{ job.approved }}</a></td>
         <td><a href="plates/{{ job.id }}">{{ job.plates_made }}</a></td>
         <td><a href="/complete/{{ job.id }}">Click to Complete</a></td>

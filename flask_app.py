@@ -85,6 +85,15 @@ def auth(user, action, job):
     return auth_user.rights
 
 
+# Changes date display with Jinja templating
+@app.template_filter()
+def datefilter(value, format='%d/%m/%y'):
+    return value.strftime(format)
+
+
+app.jinja_env.filters['datefilter'] = datefilter
+
+
 @app.route("/")
 def home():
     # Displays all incomplete jobs and orders by priority
