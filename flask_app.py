@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import desc
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.exceptions import HTTPException
@@ -49,6 +50,7 @@ class User(UserMixin, db.Model):
 class Log(db.Model):
     ''' Creates a DB for user action logs '''
     id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime)
     action = db.Column(db.String(100))
 
 
@@ -69,15 +71,15 @@ def auth(user, action, job):
     '''
     Function to check if user is authorized to perform an action.
         5 = Admin (all rights)
-        4 = _
-        3 = Sort, Edit, Approve
-        2 = Plates, Add New Job
+        4 = Sort, Edit
+        3 = Approve, Add New Job
+        2 = Plates
         1 = Complete
         0 = Read only
     Logs actions to log.db
     '''
     auth_user = User.query.get(user)
-    log_action = Log(action=f"User {auth_user.name} {action} job {job}")
+    log_action = Log(timestamp=datetime.now(), action=f"User {auth_user.name} {action} job {job}")
     db.session.add(log_action)
     db.session.commit()
     return auth_user.rights
@@ -94,7 +96,7 @@ def home():
 @login_required
 def add():
     # Currently manually adds jobs, later will import automatically from SQL
-    if auth(user=current_user.id, action="added", job="{new}") >= 2:
+    if auth(user=current_user.id, action="added", job="{new}") >= 3:
         if request.method == "GET":
             return render_template("add.html")
         else:
@@ -119,7 +121,7 @@ def add():
 def edit(job_id):
     # Allows select users to edit the priority of jobs which influences sort order
     edit_job = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="edited", job=edit_job.job_no) >= 3:
+    if auth(user=current_user.id, action="edited", job=edit_job.job_no) >= 4:
         if request.method == "GET":
             return render_template("edit.html", job=edit_job, logged_in=current_user.is_authenticated)
         else:
@@ -167,7 +169,7 @@ def complete(job_id):
 def priority_up(job_id):
     # Increases priority
     priority_edit = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="increased priority on", job=priority_edit.job_no) >= 3:
+    if auth(user=current_user.id, action="increased priority on", job=priority_edit.job_no) >= 4:
         priority_edit.priority -= 1.5
         db.session.commit()
         refresh_priority()
@@ -182,7 +184,7 @@ def priority_up(job_id):
 def priority_down(job_id):
     # Decreases priority
     priority_edit = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="decreased priority on", job=priority_edit.job_no) >= 3:
+    if auth(user=current_user.id, action="decreased priority on", job=priority_edit.job_no) >= 4:
         priority_edit.priority += 1.5
         db.session.commit()
         refresh_priority()
@@ -284,7 +286,8 @@ def logout():
 def admin():
     if auth(user=current_user.id, action="accessed admin page;", job="N/A") >= 5:
         if request.method == "GET":
-            return render_template("admin.html", logged_in=current_user.is_authenticated)
+            all_logs = Log.query.order_by(desc(Log.timestamp)).all()
+            return render_template("admin.html", all_logs=all_logs, logged_in=current_user.is_authenticated)
         else:
             name = request.form["name"]
             user = db.session.query(User).filter_by(name=name).first()

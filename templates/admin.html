@@ -15,16 +15,23 @@
         <button class="btn btn-dark buttons" type="submit">Edit User</button>
         <a class="btn btn-secondary buttons" href="{{ url_for('home') }}">Return Home</a>
     </form>
-    <br><br><hr><br>
+    <br>
+    <h2>Rights definitions:</h2>
     <ul>
-        <h3>Rights definitions:</h3>
         <li>5 = Admin (all rights)</li>
-        <li>4 = __</li>
-        <li>3 = Sort, Edit, Approve</li>
-        <li>2 = Plates, Add New Job</li>
+        <li>4 = Sort, Edit</li>
+        <li>3 = Approve, Add New Job</li>
+        <li>2 = Plates</li>
         <li>1 = Complete</li>
         <li>0 = Read Only</li>
     </ul>
+    <br><hr>
+    <h2>User Action Log:</h2>
+    <div style="height:330px;width:60vw;overflow:auto;">
+        {% for log in all_logs %}
+            <ul>{{ log.timestamp}} - {{ log.action }}</ul>
+        {% endfor %}
+    </div>
 </div>
 
 {% endblock %}
