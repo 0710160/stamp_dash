@@ -32,9 +32,9 @@
     <tr>
         {% endif %}
         <td>
-            <a href="/priority_up/{{ job.id }}"><i class="fas fa-chevron-up"></i></a>
+            <a href="/priority_up/{{ job.id }}"><i class="fas fa-chevron-up" data-fa-transform="left-6"></i></a>
             <a href="/edit/{{ job.id }}"> {{ job.job_no }} </a>
-            <a href="/priority_down/{{ job.id }}"><i class="fas fa-chevron-down"></i></a>
+            <a href="/priority_down/{{ job.id }}"><i class="fas fa-chevron-down" data-fa-transform="right-6"></i></a>
         </td>
         <td><p>{{ job.job_name }}</p>
             {% if job.notes %}
@@ -44,7 +44,7 @@
         <td><p>{{ job.due_date | datefilter }}</p></td>
         <td><a href="approved/{{ job.id }}">{{ job.approved }}</a></td>
         <td><a href="plates/{{ job.id }}">{{ job.plates_made }}</a></td>
-        <td><a href="/complete/{{ job.id }}">Click to Complete</a></td>
+        <td><a class="btn btn-secondary" href="/complete/{{ job.id }}">Complete Job</a></td>
     </tr>
     {% endfor %}
     </tbody>
