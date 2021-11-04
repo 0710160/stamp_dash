@@ -1,27 +1,29 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="container-flex blue-bg">
-
-    <h2 class="heading">Editing job number {{ job.job_no }}</h2>
-    <h4 class="subheading">Current due date: {{ job.due_date }}</h4>
-    <h4 class="subheading">Current priority: {{ job.priority }}</h4>
-
-    <hr>
-
-    <form action="" method="POST">
-        <label>Due date:</label>
-        <input type="date", name="new_due_date", placeholder="{{ job.due_date }}">
-        <label>Priority:</label>
-        <input type="number", name="new_priority", placeholder="{{ job.priority }}">
-        <br><br>
-        <label>Add Notes:</label>
-        <br>
-        <textarea maxlength="249" , style="width:495px; height:100px;", name="notes", placeholder="{{ job.notes }}"></textarea>
-        <br>
-        <button class="btn btn-dark buttons" type="submit">Submit changes</button>
-        <a class="btn btn-secondary buttons" href="{{ url_for('home') }}">Return Home</a>
-    </form>
-</div>
+    <div class="container-fluid">
+        <div class="form-container">
+            <div class="custom-card custom-card-wide text-center">
+                <div class="title">
+                    <i class="fa fa-edit" aria-hidden="true"></i>
+                    <h2 class="heading">Editing job number {{ job.job_no }}</h2>
+                    <div class="form-action">
+                        <h4 class="subheading">Current due date: {{ job.due_date }}</h4>
+                        <form action="" method="POST">
+                        <input type="date", name="new_due_date", placeholder="{{ job.due_date }}"><br>
+                        <input type="number", name="new_priority", placeholder="Priority {{ job.priority }}">
+                            {% if job.notes %}
+                        <textarea maxlength="249", style="height:100px;", name="notes", placeholder="{{ job.notes }}"></textarea>
+                            {% else %}
+                            <textarea maxlength="249", style="height:100px;", name="notes", placeholder="Add notes"></textarea>
+                            {% endif %}
+                        <br>
+                        <button class="btn btn-light buttons" type="submit">Submit changes</button><br>
+                        <a class="btn btn-light buttons" href="{{ url_for('home') }}">Return Home</a>
+                    </form>
+                </div>
+            </div></div>
+        </div>
+    </div>
 
 {% endblock %}

@@ -12,19 +12,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;400;700;900&display=swap" rel="stylesheet">
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <!-- FontAwesome -->
     <script src="https://kit.fontawesome.com/57fb702c7e.js" crossorigin="anonymous"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 
     <meta http-equiv="refresh" content="600">  <!-- forces refresh every ten minutes -->
 
 </head>
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<nav class="navbar navbar-expand-lg navbar-light nav-custom-bg">
     <a class="navbar-brand" href="{{ url_for('home') }}">
         <img src="{{ url_for('static', filename='favicon.png') }}" alt="logo", width="60", class="d-inline-block align-text-top">
     </a>
-    <h1>Southern Colour Print Production Schedule</h1>
+    <h1>Stamp Production Schedule</h1>
   <div class="collapse navbar-collapse">
     <ul class="navbar-nav ml-auto">
       <li class="nav-item">
