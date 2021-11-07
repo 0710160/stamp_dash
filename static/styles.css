@@ -15,39 +15,40 @@ body {
 
 h1 {
   font-weight: 700;
-  font-size: 1.8em;
-  margin-top: 8px;
-  /*background: linear-gradient(to bottom right, #2EF2C0, #D139F0);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;*/
+  font-size: 1.5em;
+  margin-top: 6px;
   color: #06038D;
   }
 
 h2 {
-  font-size: 1.5em;
+  font-size: 1.2em;
   color: var(--heading-color);
   }
 
 h4 {
-  margin-top: 12px;
-  font-size: 1.2em;
+  margin-top: 10px;
+  font-size: 1.1em;
   color: var(--text-color);
   }
 
 a {
-  font-size: 1.2em;
+  font-size: 1.1em;
   color: var(--a-color);
 }
 
 p {
-  font-size: 1.2em;
+  font-size: 1.1em;
   color: var(--text-color);
   padding: 0;
   }
 
 th {
-  font-size: 1.2em;
+  font-size: 1.1em;
   color: var(--heading-color);
+  }
+
+.job-rtg {
+  background: rgba(47, 213, 214, 0.2);
   }
 
 label {
@@ -55,7 +56,7 @@ label {
   }
 
 .container-flex {
-    padding: 20px;
+    padding: 15px;
     }
 
 .notes {
@@ -70,6 +71,10 @@ label {
   display: inline-block;
   }
 
+table .buttons {
+  margin-top: 0;
+  }
+
 .flashes {
   color: #384B52;
   }
@@ -78,8 +83,6 @@ label {
 FLASK FORMS WITH GRADIENT BOX
 -------------------------------------------------------------------------------------*/
 .form-container {
-  width: 100%;
-  height: 80vh;
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
           padding: 100px 0;
@@ -119,8 +122,8 @@ FLASK FORMS WITH GRADIENT BOX
   width: 100%;
   height: 40%;
   background: rgba(255, 255, 255, .1);
-z-index: 1;
--webkit-transform: skewY(-5deg) scale(1.5);
+  z-index: 1;
+  -webkit-transform: skewY(-5deg) scale(1.5);
         transform: skewY(-5deg) scale(1.5);
 }
 
@@ -134,7 +137,6 @@ z-index: 1;
   line-height: 100px;
   -webkit-box-shadow: 0 10px 10px rgba(0,0,0,.1) ;
           box-shadow: 0 10px 10px rgba(0,0,0,.1) ;
-
 }
 
 .title h2 {
@@ -183,3 +185,29 @@ z-index: 1;
 .custom-card-wide input, textarea {
   width: 300px;
   }
+
+/*-----------------------------------------------------------------
+ANIMATIONS
+-----------------------------------------------------------------*/
+.animate-pop-in {
+    animation: pop-in .6s ease-out forwards;
+    }
+
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-4rem) scale(0.8);
+    }
+  100% {
+    opacity: 1;
+    transform: none;
+    }
+  }
+
+
+/*-----------------------------------------------------------------
+FOOTER
+-----------------------------------------------------------------*/
+footer {
+    padding: 0 30px;
+}

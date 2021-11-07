@@ -27,7 +27,7 @@
     <tbody>
     {% for job in all_jobs %}
     {% if job.approved == True and job.plates_made == True %}
-    <tr style="background-color: #EEEEEE;">
+    <tr class="job-rtg">
     {% else %}
     <tr>
         {% endif %}
@@ -44,12 +44,14 @@
         <td><p>{{ job.due_date | datefilter }}</p></td>
         <td><a href="approved/{{ job.id }}">{{ job.approved }}</a></td>
         <td><a href="plates/{{ job.id }}">{{ job.plates_made }}</a></td>
-        <td><a class="btn btn-secondary" href="/complete/{{ job.id }}">Complete Job</a></td>
+        {% if job.approved == True and job.plates_made == True %}
+        <td><a class="btn btn-light" href="/complete/{{ job.id }}">Complete Job</a></td>
+        {% endif %}
     </tr>
     {% endfor %}
     </tbody>
 </table>
 
-<a class="btn btn-dark buttons add-new" href="{{ url_for('add') }}">Add new job</a>
+<a class="btn btn-primary buttons add-new" href="{{ url_for('add') }}">Add new job</a>
 </div>
 {% endblock %}
