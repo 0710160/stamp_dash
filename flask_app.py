@@ -7,10 +7,14 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.exceptions import HTTPException
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 from telegram_bot import TelegramBot
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = "5K1Ax8pWqbNMkTkMJuY"
+app.config['SECRET_KEY'] = SECRET_KEY
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///production_schedule.sqlite3'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 Bootstrap(app)
@@ -85,6 +89,29 @@ def auth(user, action, job):
     return auth_user.rights
 
 
+def plates_resort(job):
+    '''Re-sorts job order based on new confirmed+plated job'''
+    all_jobs = Jobs.query.order_by(Jobs.priority).all()
+    mark = 0
+    for i in all_jobs:
+        if i.approved and i.plates_made:
+            mark += 1
+    job.priority = mark
+    refresh_priority()
+
+
+def date_resort(job):
+    '''Re-sorts job order based on new job's due date'''
+    all_jobs = Jobs.query.order_by(Jobs.priority).all()
+    mark = 0
+    for i in all_jobs:
+        added_job_date = i.due_date.strftime("%d%m%y")
+        if i.approved or added_job_date < job.due_date.strftime("%d%m%y"):
+            mark += 1
+    job.priority = mark
+    refresh_priority()
+
+
 # Changes date display with Jinja templating
 @app.template_filter()
 def datefilter(value, format='%d/%m/%y'):
@@ -115,8 +142,7 @@ def add():
             due_date = datetime.strptime(due_date, "%Y-%m-%d")
             add_job = Jobs(job_no=job_no, job_name=job_name, due_date=due_date)
             db.session.add(add_job)
-            db.session.commit()
-            refresh_priority()
+            date_resort(add_job)
             all_jobs = Jobs.query.order_by(Jobs.priority).all()
             return redirect(url_for("home", all_jobs=all_jobs))
     else:
@@ -150,7 +176,7 @@ def edit(job_id):
             else:
                 notes = request.form["notes"]
                 edit_job.notes = notes
-            db.session.commit()
+            refresh_priority()
             all_jobs = Jobs.query.order_by(Jobs.priority).all()
             return redirect(url_for("home", all_jobs=all_jobs, logged_in=current_user.is_authenticated))
     else:
@@ -180,7 +206,6 @@ def priority_up(job_id):
     priority_edit = Jobs.query.get(job_id)
     if auth(user=current_user.id, action="increased priority on", job=priority_edit.job_no) >= 4:
         priority_edit.priority -= 1.5
-        db.session.commit()
         refresh_priority()
     else:
         flash("You are not authorized to perform this action.")
@@ -195,7 +220,6 @@ def priority_down(job_id):
     priority_edit = Jobs.query.get(job_id)
     if auth(user=current_user.id, action="decreased priority on", job=priority_edit.job_no) >= 4:
         priority_edit.priority += 1.5
-        db.session.commit()
         refresh_priority()
     else:
         flash("You are not authorized to perform this action.")
@@ -206,14 +230,16 @@ def priority_down(job_id):
 @app.route("/plates/<job_id>")
 @login_required
 def plates(job_id):
-    # Saves checkbox
+    # Toggles True/False
     job = Jobs.query.get(job_id)
     if auth(user=current_user.id, action="plates made for", job=job.job_no) >= 2:
         if job.plates_made:
             job.plates_made = False
+            db.session.commit()
         else:
             job.plates_made = True
-        db.session.commit()
+            # Runs through list to re-prioritise below other confirmed/plated jobs
+            plates_resort(job)
     else:
         flash("You are not authorized to perform this action.")
     all_jobs = Jobs.query.order_by(Jobs.priority).all()
@@ -223,14 +249,16 @@ def plates(job_id):
 @app.route("/approved/<job_id>")
 @login_required
 def approved(job_id):
-    # Saves checkbox
+    # Toggles True/False
     job = Jobs.query.get(job_id)
     if auth(user=current_user.id, action="approved", job=job.job_no) >= 3:
         if job.approved:
             job.approved = False
+            db.session.commit()
         else:
             job.approved = True
-        db.session.commit()
+            # Runs through list to re-prioritise below other confirmed/plated jobs
+            plates_resort(job)
     else:
         flash("You are not authorized to perform this action.")
     all_jobs = Jobs.query.order_by(Jobs.priority).all()
