@@ -6,7 +6,6 @@
   }
 
 body {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   font-family: 'Roboto', sans-serif;
@@ -55,8 +54,9 @@ label {
   color: #fff
   }
 
-.container-flex {
-    padding: 15px;
+.container-fluid {
+  min-height: 88vh;
+  padding: 15px;
     }
 
 .notes {
@@ -208,6 +208,3 @@ ANIMATIONS
 /*-----------------------------------------------------------------
 FOOTER
 -----------------------------------------------------------------*/
-footer {
-    padding: 0 30px;
-}
