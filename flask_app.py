@@ -15,8 +15,8 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL2")
-#app.config['SQLALCHEMY_DATABASE_URI'] = ("sqlite:///production_schedule.sqlite3")
+#app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL2")
+app.config['SQLALCHEMY_DATABASE_URI'] = ("sqlite:///production_schedule.sqlite3")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 Bootstrap(app)
 db = SQLAlchemy(app)
@@ -141,7 +141,8 @@ def add():
             job_name = request.form["job_name"]
             due_date = (request.form["due_date"])
             due_date = datetime.strptime(due_date, "%Y-%m-%d")
-            add_job = Jobs(job_no=job_no, job_name=job_name, due_date=due_date)
+            notes = request.form["notes"]
+            add_job = Jobs(job_no=job_no, job_name=job_name, due_date=due_date, notes=notes)
             db.session.add(add_job)
             date_resort(add_job)
             all_jobs = Jobs.query.order_by(Jobs.priority).all()
@@ -177,6 +178,11 @@ def edit(job_id):
             else:
                 notes = request.form["notes"]
                 edit_job.notes = notes
+            if request.form["job_desc"] == "":
+                pass
+            else:
+                job_name = request.form["job_name"]
+                edit_job.job_name = job_name
             refresh_priority()
             all_jobs = Jobs.query.order_by(Jobs.priority).all()
             return redirect(url_for("home", all_jobs=all_jobs, logged_in=current_user.is_authenticated))

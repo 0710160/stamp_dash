@@ -10,16 +10,18 @@
                     <div class="form-action">
                         <h4 class="subheading">Current due date: {{ job.due_date }}</h4>
                         <form action="" method="POST">
-                        <input type="date", name="new_due_date", placeholder="{{ job.due_date }}"><br>
-                        <input type="number", name="new_priority", placeholder="Priority {{ job.priority }}">
-                            {% if job.notes %}
-                        <textarea maxlength="249", style="height:100px;", name="notes", placeholder="{{ job.notes }}"></textarea>
-                            {% else %}
-                            <textarea maxlength="249", style="height:100px;", name="notes", placeholder="Add notes"></textarea>
-                            {% endif %}
+                            <input type="string", name="new_name", placeholder="{{ job.job_name }}">
+                            <input type="date", name="new_due_date", placeholder="{{ job.due_date }}"><br>
+                            <input type="number", name="new_priority", placeholder="Priority {{ job.priority }}">
+                                {% if job.notes %}
+                            <textarea maxlength="249", style="height:100px;", name="notes", placeholder="{{ job.notes }}"></textarea>
+                                {% else %}
+                                <textarea maxlength="249", style="height:100px;", name="notes", placeholder="Add notes"></textarea>
+                                {% endif %}
                         <br>
-                        <button class="btn btn-light buttons" type="submit">Submit changes</button><br>
-                        <a class="btn btn-light buttons" href="{{ url_for('home') }}">Return Home</a>
+                        <button class="btn btn-light buttons" type="submit">Submit changes</button>
+                        <a class="btn btn-light buttons" href="{{ url_for('home') }}">Return Home</a><br>
+                            <a class="btn btn-danger buttons" href="/complete/{{ job.id }}">Delete Job</a>
                     </form>
                 </div>
             </div></div>
