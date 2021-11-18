@@ -175,13 +175,15 @@ def edit(job_id):
                 edit_job.priority = new_priority
             if request.form["notes"] == "":
                 pass
+            elif request.form["notes"] == " ":
+                edit_job.notes = None
             else:
                 notes = request.form["notes"]
                 edit_job.notes = notes
-            if request.form["job_desc"] == "":
+            if request.form["new_name"] == "":
                 pass
             else:
-                job_name = request.form["job_name"]
+                job_name = request.form["new_name"]
                 edit_job.job_name = job_name
             refresh_priority()
             all_jobs = Jobs.query.order_by(Jobs.priority).all()

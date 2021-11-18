@@ -206,5 +206,23 @@ ANIMATIONS
 
 
 /*-----------------------------------------------------------------
-FOOTER
+MEDIA QUERIES
 -----------------------------------------------------------------*/
+@media only screen and (max-width:1300px) {
+    .buttons {
+        width: 120px;
+        font-size: 0.9em
+    }
+
+    h1 {
+        font-size: 1.2em;
+    }
+
+    h2 {
+        font-size: 1.0em;
+    }
+
+    h4,a,p,th {
+        font-size: 0.9em;
+    }
+}

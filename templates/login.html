@@ -18,7 +18,7 @@
                     {% endwith %}
                 <div class="form-action">
                     <form action="{{ url_for('login') }}" method="post">
-                        <input type="text" name="name" placeholder="Name" required="required"/>
+                        <input type="text" name="name" placeholder="Name" required="required", autofocus="True"/>
                         <input type="password" name="password" placeholder="Password" required="required"/>
                         <br>
                         <button type="submit" class="btn btn-light buttons">Log In</button>

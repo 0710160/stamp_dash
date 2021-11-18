@@ -1,4 +1,4 @@
-reated by https://www.toptal.com/developers/gitignore/api/flask
+Created by https://www.toptal.com/developers/gitignore/api/flask
 # Edit at https://www.toptal.com/developers/gitignore?templates=flask
 
 ### Flask ###
@@ -144,5 +144,8 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# SQL Database
+production_scheduler.sqlite3
 
 # End of https://www.toptal.com/developers/gitignore/api/flask

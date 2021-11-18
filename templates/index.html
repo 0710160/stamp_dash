@@ -45,7 +45,7 @@
         <td><a href="approved/{{ job.id }}">{{ job.approved }}</a></td>
         <td><a href="plates/{{ job.id }}">{{ job.plates_made }}</a></td>
         {% if job.approved == True and job.plates_made == True %}
-        <td><a class="btn btn-light" href="/complete/{{ job.id }}">Complete Job</a></td>
+        <td><a class="btn btn-light buttons" href="/complete/{{ job.id }}">Complete Job</a></td>
         {% endif %}
     </tr>
     {% endfor %}
