@@ -34,7 +34,7 @@ def load_user(user_id):
 class Jobs(db.Model):
     ''' Creates a DB for the job information '''
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    job_no = db.Column(db.String, nullable=False)
+    job_no = db.Column(db.String, unique=True, nullable=False)
     job_name = db.Column(db.String(250), nullable=False)
     due_date = db.Column(db.Date)
     priority = db.Column(db.Float, default=9)
@@ -76,8 +76,8 @@ def auth(user, action, job):
     '''
     Function to check if user is authorized to perform an action.
         5 = Admin (all rights)
-        4 = Sort, Edit
-        3 = Approve, Add New Job
+        4 = Sort
+        3 = Approve, Edit, Add New Job
         2 = Plates
         1 = Complete
         0 = Read only
@@ -97,7 +97,7 @@ def plates_resort(job):
     for i in all_jobs:
         if i.approved and i.plates_made:
             mark += 1
-    job.priority = mark
+    job.priority = mark + 0.5
     refresh_priority()
 
 
@@ -109,7 +109,7 @@ def date_resort(job):
         added_job_date = i.due_date.strftime("%d%m%y")
         if i.approved or added_job_date < job.due_date.strftime("%d%m%y"):
             mark += 1
-    job.priority = mark
+    job.priority = mark + 0.5
     refresh_priority()
 
 
@@ -158,7 +158,7 @@ def add():
 def edit(job_id):
     # Allows select users to edit the priority of jobs which influences sort order
     edit_job = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="edited", job=edit_job.job_no) >= 4:
+    if auth(user=current_user.id, action="edited", job=edit_job.job_no) >= 3:
         if request.method == "GET":
             return render_template("edit.html", job=edit_job, logged_in=current_user.is_authenticated)
         else:
@@ -204,8 +204,7 @@ def complete(job_id):
         db.session.commit()
     else:
         flash("You are not authorized to perform this action.")
-    all_jobs = Jobs.query.order_by(Jobs.priority).all()
-    return redirect(url_for("home", all_jobs=all_jobs, logged_in=current_user.is_authenticated))
+    return redirect(request.referrer)
 
 
 @app.route("/priority_up/<job_id>")
@@ -218,8 +217,7 @@ def priority_up(job_id):
         refresh_priority()
     else:
         flash("You are not authorized to perform this action.")
-    all_jobs = Jobs.query.order_by(Jobs.priority).all()
-    return redirect(url_for("home", all_jobs=all_jobs, logged_in=current_user.is_authenticated))
+    return redirect(request.referrer)
 
 
 @app.route("/priority_down/<job_id>")
@@ -232,8 +230,7 @@ def priority_down(job_id):
         refresh_priority()
     else:
         flash("You are not authorized to perform this action.")
-    all_jobs = Jobs.query.order_by(Jobs.priority).all()
-    return redirect(url_for("home", all_jobs=all_jobs, logged_in=current_user.is_authenticated))
+    return redirect(request.referrer)
 
 
 @app.route("/plates/<job_id>")
@@ -251,8 +248,7 @@ def plates(job_id):
             plates_resort(job)
     else:
         flash("You are not authorized to perform this action.")
-    all_jobs = Jobs.query.order_by(Jobs.priority).all()
-    return redirect(url_for("home", all_jobs=all_jobs, logged_in=current_user.is_authenticated))
+    return redirect(request.referrer)
 
 
 @app.route("/approved/<job_id>")
@@ -270,8 +266,7 @@ def approved(job_id):
             plates_resort(job)
     else:
         flash("You are not authorized to perform this action.")
-    all_jobs = Jobs.query.order_by(Jobs.priority).all()
-    return redirect(url_for("home", all_jobs=all_jobs, logged_in=current_user.is_authenticated))
+    return redirect(request.referrer)
 
 
 @app.route('/new_user', methods=["GET", "POST"])
@@ -333,7 +328,8 @@ def admin():
     if auth(user=current_user.id, action="accessed admin page;", job="N/A") >= 5:
         if request.method == "GET":
             all_logs = Log.query.order_by(desc(Log.timestamp)).all()
-            return render_template("admin.html", all_logs=all_logs, logged_in=current_user.is_authenticated)
+            all_users = User.query.all()
+            return render_template("admin.html", all_logs=all_logs, users=all_users, logged_in=current_user.is_authenticated)
         else:
             name = request.form["name"]
             user = db.session.query(User).filter_by(name=name).first()

@@ -8,10 +8,10 @@
     <div class="row">
         <div class="col-6 col-sm-3">
     <form action="" method="POST">
-        <label>User name:</label>
+        <label style="color:black;">User name:</label>
         <input type="text", style="width:100px;", name="name">
-        <label>Access rights:</label>
-        <input type="text", style="width:50px;" name="rights">
+        <label style="color:black;">Access rights:</label>
+        <input type="text", style="width:50px;", name="rights">
         <br>
         <button class="btn btn-dark buttons" type="submit">Edit User</button>
         <a class="btn btn-secondary buttons" href="{{ url_for('home') }}">Return Home</a>
@@ -20,14 +20,19 @@
         <div class="col-6 col-sm-3">
     <ul>
         <li>5 = Admin (all rights)</li>
-        <li>4 = Sort, Edit</li>
-        <li>3 = Approve, Add New Job</li>
+        <li>4 = Sort</li>
+        <li>3 = Approve, Edit, Add New Job</li>
         <li>2 = Plates</li>
         <li>1 = Complete</li>
         <li>0 = Read Only</li>
     </ul>
             </div>
         </div>
+    <br><hr>
+    <h2>Current User List:</h2>
+    {% for user in users: %}
+    <li>{{ user.name }}: {{ user.rights }}</li>
+    {% endfor %}
     <br><hr>
     <h2>User Action Log:</h2>
     <div style="height:300px;width:700px;overflow:auto;">
