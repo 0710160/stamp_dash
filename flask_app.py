@@ -95,7 +95,7 @@ def plates_resort(job):
     all_jobs = Jobs.query.order_by(Jobs.priority).all()
     mark = 0
     for i in all_jobs:
-        if i.approved and i.plates_made:
+        if i.approved and i.plates_made and not i.job_no == job.job_no:
             mark += 1
     job.priority = mark + 0.5
     refresh_priority()
