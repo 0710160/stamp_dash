@@ -199,9 +199,11 @@ def edit(job_id):
 def complete(job_id):
     # Removes a job from the database
     delete_job = Jobs.query.get(job_id)
+    job_name = delete_job.job_name
     if auth(user=current_user.id, action="completed", job=delete_job.job_no) >= 1:
         db.session.delete(delete_job)
         db.session.commit()
+        TelegramBot.send_text(f"Job {job_name} completed.")
     else:
         flash("You are not authorized to perform this action.")
     return redirect(request.referrer)
