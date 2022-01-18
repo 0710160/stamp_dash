@@ -123,6 +123,7 @@ app.jinja_env.filters['datefilter'] = datefilter
 
 
 @app.route("/")
+@login_required
 def home():
     # Displays all incomplete jobs and orders by priority
     all_jobs = Jobs.query.order_by(Jobs.priority).all()
