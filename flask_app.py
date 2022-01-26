@@ -295,7 +295,7 @@ def new_user():
             db.session.commit()
             login_user(new_db_entry, remember=True)
             all_jobs = Jobs.query.order_by(Jobs.priority).all()
-            TelegramBot.send_text(f"New user {name} created.\nGo to http://0710160.pythonanywhere.com/admin to approve.")
+            TelegramBot.send_text(f"New user {name} created.\nGo to http://www.jobslist.scolour.co.nz/admin to approve.")
             return redirect(url_for("home", all_jobs=all_jobs, logged_in=current_user.is_authenticated))
 
 
