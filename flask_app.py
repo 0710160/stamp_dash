@@ -59,13 +59,13 @@ class Log(db.Model):
     action = db.Column(db.String(100))
 
 
-db.create_all()
+#db.create_all()
 
 
 def refresh_priority():
     ''' Function to count all jobs in DB and re-arrange based on priority where 1 is highest '''
     all_jobs = Jobs.query.order_by(Jobs.priority).all()
-    new_priority = 1
+    new_priority = 0
     for job in all_jobs:
         job.priority = new_priority
         new_priority += 1
@@ -97,6 +97,7 @@ def plates_resort(job):
     for i in all_jobs:
         if i.approved and i.plates_made and not i.job_no == job.job_no:
             mark += 1
+            print(i.job_no, mark)
     job.priority = mark + 0.5
     refresh_priority()
 
@@ -336,8 +337,18 @@ def admin():
         else:
             name = request.form["name"]
             user = db.session.query(User).filter_by(name=name).first()
-            rights = int(request.form["rights"])
-            user.rights = rights
+            try:
+                rights = int(request.form["rights"])
+                user.rights = rights
+            except ValueError:
+                pass
+            if request.form["password"] == "":
+                password = generate_password_hash(
+                    request.form["password"],
+                    method='pbkdf2:sha256',
+                    salt_length=8
+                )
+                user.password = password
             db.session.commit()
             all_jobs = Jobs.query.order_by(Jobs.priority).all()
             return render_template("index.html", all_jobs=all_jobs, logged_in=current_user.is_authenticated)
