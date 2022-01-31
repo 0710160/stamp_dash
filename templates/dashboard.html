@@ -1,11 +1,29 @@
-{% extends "base.html" %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='favicon.png') }}" sizes="180x180">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" sizes="32x32" type="image/png">
+    <title>Stamp Job Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;400;700;900&display=swap" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">    <!-- Custom CSS -->
+    <!-- FontAwesome -->
+    <script src="https://kit.fontawesome.com/57fb702c7e.js" crossorigin="anonymous"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
 
-<div class="container-fluid">
+
+<div class="container-fluid full-bg">
     <div class="d-flex flex-wrap">
         {% for i in all_jobs %}
         <div class="card">
-            <div class="title">
+            <div class="title header_img">
                 <a href="/upload_img/{{ i.id }}">
                     {% if i.img_name %}
                     <div class="job_img" style="background-image: url(/static/uploads/{{ i.img_name }});"></div>
@@ -13,14 +31,19 @@
                     <i class="fa fa-edit img_placeholder" aria-hidden="true"></i>
                     {% endif %}
                 </a>
-                <a href="/edit/{{ i.id }}"><h4>{{ i.job_no }}</h4></a>
-                <h4>{{ i.job_name }}</h4>
+                <a href="/edit/{{ i.id }}" class="job_no">{{ i.job_no }}</a>
+            </div>
+            <div class="details">
+                <h3>{{ i.job_name }}</h3>
                 <h4>Due date: {{ i.due_date | datefilter }}</h4>
-                <a href="/status/{{ i.id }}"><h4>{{ i.status }}</h4></a>
+                <a href="/status/{{ i.id }}">{{ i.status }}</a>
+                {% if i.notes %}
+                <p>Notes: {{ i.notes }}</p>
+                {% endif %}
             </div>
         </div>
         {% endfor %}
     </div>
 </div>
 
-{% endblock %}
+</html>

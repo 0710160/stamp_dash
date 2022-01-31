@@ -71,6 +71,12 @@ label {
   display: inline-block;
   }
 
+thead th {
+  background-color: #fff;
+  position: sticky;
+  top: 0;
+}
+
 table .buttons {
   margin-top: 0;
   }
@@ -199,29 +205,62 @@ FLASK FORMS WITH GRADIENT BOX
 /*-----------------------------------------------------------------
 DASHBOARD
 -----------------------------------------------------------------*/
+.full-bg {
+  background-image: url(gradienta-QWutu2BRpOs-unsplash.jpg);
+  background-size: cover;
+  background-repeat: no-repeat;
+  height: 100vh;
+  padding: 5%;
+}
+
 .card {
-  width: 200px;
-  background-color: rgba(47, 213, 214, 0.2);
+  width: 250px;
+  background-color: rgba(255, 255, 255, 0.8);
   margin: 1%;
-  border-radius: 15px 15px 0 0;
+  border-radius: 10px;
+  border: none;
 }
 
 .card h4 {
   color: var(--text-color);
 }
 
+.card h3 {
+  font-size: 1.2em;
+  }
+
 .card .job_img {
-  width: 200px;
-  height: 100px;
+  width: 250px;
+  height: 130px;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
   display: inline-block;
+  border-radius: 10px 10px 0 0;
+}
+
+.card .job_no {
+  color: #fff;
+  text-shadow: 0.5px 0.5px 2px #303030;
+  font-size: 1.3em;
+  position: absolute;
+  left: 10px;
+  top: 100px;
 }
 
 .card .img_placeholder {
   position: relative;
   left: 25%;
+}
+
+.details {
+  padding: 10px;
+  font-size: 80%;
+}
+
+.header_img {
+  height: 130px;
+  border-radius: 10px 10px 0 0;
 }
 
 
