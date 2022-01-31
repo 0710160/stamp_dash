@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container-fluid">
+    <div class="d-flex flex-wrap">
+        {% for i in all_jobs %}
+        <div class="card">
+            <div class="title">
+                <a href="/upload_img/{{ i.id }}">
+                    {% if i.img_name %}
+                    <div class="job_img" style="background-image: url(/static/uploads/{{ i.img_name }});"></div>
+                    {% else %}
+                    <i class="fa fa-edit img_placeholder" aria-hidden="true"></i>
+                    {% endif %}
+                </a>
+                <a href="/edit/{{ i.id }}"><h4>{{ i.job_no }}</h4></a>
+                <h4>{{ i.job_name }}</h4>
+                <h4>Due date: {{ i.due_date | datefilter }}</h4>
+                <a href="/status/{{ i.id }}"><h4>{{ i.status }}</h4></a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

@@ -79,6 +79,7 @@ table .buttons {
   color: #384B52;
   }
 
+
 /*-------------------------------------------------------------------------------------
 FLASK FORMS WITH GRADIENT BOX
 -------------------------------------------------------------------------------------*/
@@ -185,6 +186,44 @@ FLASK FORMS WITH GRADIENT BOX
 .custom-card-wide input, textarea {
   width: 300px;
   }
+
+.job_img {
+  width: 400px;
+  height: 200px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  display: inline-block;
+}
+
+/*-----------------------------------------------------------------
+DASHBOARD
+-----------------------------------------------------------------*/
+.card {
+  width: 200px;
+  background-color: rgba(47, 213, 214, 0.2);
+  margin: 1%;
+  border-radius: 15px 15px 0 0;
+}
+
+.card h4 {
+  color: var(--text-color);
+}
+
+.card .job_img {
+  width: 200px;
+  height: 100px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  display: inline-block;
+}
+
+.card .img_placeholder {
+  position: relative;
+  left: 25%;
+}
+
 
 /*-----------------------------------------------------------------
 ANIMATIONS
