@@ -8,7 +8,9 @@
             <div class="custom-card custom-card-wide text-center animate-pop-in">
                 <div class="title">
                     <a href="/upload_img/{{ job.id }}">
+                        {% if file_exists %}
                        <div class="job_img" style="background-image: url(/static/uploads/{{ job.img_name }});"></div>
+                        {% endif %}
                     </a>
                     <h2 class="heading">Editing job number {{ job.job_no }}</h2>
                     <div class="form-action">
