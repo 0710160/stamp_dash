@@ -16,13 +16,14 @@
                     <i class="fa fa-edit img_placeholder" aria-hidden="true"></i>
                     {% endif %}
                 </a>
-                <a href="/edit/{{ i.id }}" class="job_no">{{ i.job_no }}</a>
             </div>
             <div class="details">
-                <h3>{{ i.job_name }}</h3>
+                <a href="/edit/{{ i.id }}" class="job_no">{{ i.job_no }}</a>
+                <div class="job_name"><h3>{{ i.job_name }}</h3></div>
                 <h4>Due date: {{ i.due_date | datefilter }}</h4>
                 <a href="/status/{{ i.id }}">{{ i.status }}</a>
                 {% if i.notes %}
+                <hr>
                 <p>Notes: {{ i.notes }}</p>
                 {% endif %}
             </div>

@@ -5,12 +5,24 @@
   --text-color: #334257;
   }
 
+html {
+  position: relative;
+  min-height: 100%;
+}
+
 body {
   display: flex;
   flex-direction: column;
   font-family: 'Roboto', sans-serif;
   background-color: var(--bg-color);
+  height: 100%;
   }
+
+footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%
+}
 
 h1 {
   font-weight: 700;
@@ -41,10 +53,20 @@ p {
   padding: 0;
   }
 
+.navbar {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
 th {
   font-size: 1.1em;
   color: var(--heading-color);
   }
+
+thead th {
+  background-color: #fff;
+  position: sticky;
+  top: 0;
+}
 
 .job-rtg {
   background: rgba(47, 213, 214, 0.2);
@@ -71,10 +93,15 @@ label {
   display: inline-block;
   }
 
-thead th {
-  background-color: #fff;
-  position: sticky;
-  top: 0;
+.add-new {
+  height: 80px;
+  width: 80px;
+  border-radius: 100px;
+  position: fixed;
+  right: 3%;
+  bottom: 3%;
+  padding: 10px;
+  box-shadow: 4px 3px 8px 1px #969696;
 }
 
 table .buttons {
@@ -92,7 +119,7 @@ FLASK FORMS WITH GRADIENT BOX
 .form-container {
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
-          padding: 100px 0;
+          padding: 50px 0;
 }
 
 .custom-card {
@@ -161,6 +188,10 @@ FLASK FORMS WITH GRADIENT BOX
   font-size: 0.8em;
   }
 
+.card_form h4 {
+  margin: 5px;
+}
+
 .form-action {
   position: relative;
   z-index: 2;
@@ -194,8 +225,8 @@ FLASK FORMS WITH GRADIENT BOX
   }
 
 .job_img {
-  width: 400px;
-  height: 200px;
+  width: 300px;
+  height: 150px;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -206,11 +237,13 @@ FLASK FORMS WITH GRADIENT BOX
 DASHBOARD
 -----------------------------------------------------------------*/
 .full-bg {
+  position: absolute;
   background-image: url(gradienta-QWutu2BRpOs-unsplash.jpg);
   background-size: cover;
   background-repeat: no-repeat;
   height: 100vh;
-  padding: 5%;
+  padding: 7% 5% 0 5%;
+  z-index: -1;
 }
 
 .card {
@@ -243,9 +276,10 @@ DASHBOARD
   color: #fff;
   text-shadow: 0.5px 0.5px 2px #303030;
   font-size: 1.3em;
-  position: absolute;
-  left: 10px;
-  top: 100px;
+}
+
+.card .job_name {
+  height: 40px;
 }
 
 .card .img_placeholder {

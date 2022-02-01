@@ -8,19 +8,28 @@
             <div class="custom-card custom-card-wide text-center animate-pop-in">
                 <div class="title">
                     <a href="/upload_img/{{ job.id }}">
-                        {% if job.img_name %}
-                        <div class="job_img" style="background-image: url(/static/uploads/{{ job.img_name }});"></div>
-                        {% else %}
-                        <i class="fa fa-edit" aria-hidden="true"></i>
-                        {% endif %}
+                       <div class="job_img" style="background-image: url(/static/uploads/{{ job.img_name }});"></div>
                     </a>
                     <h2 class="heading">Editing job number {{ job.job_no }}</h2>
                     <div class="form-action">
-                        <h4 class="subheading">Current due date: {{ job.due_date }}</h4>
-                        <form action="" method="POST">
+                        <form action="" class="card_form" method="POST">
+                            <div class="row">
+                                <div class="col-3"></div>
+                                <div class="col-3">
+                                    <h4>Is stamp?</h4>
+                                </div>
+                                <div class="col-3">
+                                    {% if job.is_stamp %}
+                                    <input type="checkbox", style="width:50px;", name="is_stamp" checked>
+                                    {% else %}
+                                    <input type="checkbox", style="width:50px;", name="is_stamp">
+                                    {% endif %}
+                                </div>
+                                <div class="col-3"></div>
+                            </div>
+                            <!--h4>Current due date: {{ job.due_date }}</h4-->
                             <input type="string", name="new_name", placeholder="{{ job.job_name }}">
                             <input type="date", name="new_due_date", placeholder="{{ job.due_date }}"><br>
-                            <input type="number", name="new_priority", placeholder="Priority {{ job.priority }}"><br>
                             <select name="status", style="width:300px;">
                                 <option value="curr">{{ job.status }}</option>
                                 <option value="proof">On proof</option>
@@ -31,6 +40,7 @@
                                 <option value="check_pack">Check & pack</option>
                                 <option value="dispatched">Dispatched</option>
                             </select><br>
+                            <input type="number", name="new_priority", placeholder="Priority {{ job.priority }}"><br>
                                 {% if job.notes %}
                             <textarea maxlength="249", style="height:100px;", name="notes", placeholder="{{ job.notes }}"></textarea>
                                 {% else %}
