@@ -205,7 +205,7 @@ def edit(job_id):
                 if request.form.getlist('is_stamp')[0]:
                     edit_job.is_stamp = True
             except IndexError:
-                pass
+                edit_job.is_stamp = False
             if request.form["new_priority"] == "":
                 pass
             else:
@@ -346,11 +346,11 @@ def plates(job_id):
     if auth(user=current_user.id, action="plates made for", job=job.job_no) >= 2:
         if job.plates_made:
             job.plates_made = False
-            current_date = datetime.now().strftime('%d/%m/%Y')
-            job.status = f'Plates made {current_date}'
             db.session.commit()
         else:
             job.plates_made = True
+            current_date = datetime.now().strftime('%d/%m/%Y')
+            job.status = f'Plates made {current_date}'
             # Runs through list to re-prioritise below other confirmed/plated jobs
             plates_resort(job)
     else:
@@ -366,11 +366,11 @@ def approved(job_id):
     if auth(user=current_user.id, action="approved", job=job.job_no) >= 3:
         if job.approved:
             job.approved = False
-            current_date = datetime.now().strftime('%d/%m/%Y')
-            job.status = f'Proof approved {current_date}'
             db.session.commit()
         else:
             job.approved = True
+            current_date = datetime.now().strftime('%d/%m/%Y')
+            job.status = f'Proof approved {current_date}'
             # Runs through list to re-prioritise below other confirmed/plated jobs
             plates_resort(job)
     else:

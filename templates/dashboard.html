@@ -18,12 +18,12 @@
                 </a>
             </div>
             <div class="details">
-                <a href="/edit/{{ i.id }}" class="job_no">{{ i.job_no }}</a>
-                <div class="job_name"><h3>{{ i.job_name }}</h3></div>
+                <div class="job_name"><h3>{{ i.job_no }} - {{ i.job_name }}</h3></div>
+                <hr>
                 <h4>Due date: {{ i.due_date | datefilter }}</h4>
                 <a href="/status/{{ i.id }}">{{ i.status }}</a>
+                <br><br>
                 {% if i.notes %}
-                <hr>
                 <p>Notes: {{ i.notes }}</p>
                 {% endif %}
             </div>

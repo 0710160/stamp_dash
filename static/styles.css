@@ -272,14 +272,12 @@ DASHBOARD
   border-radius: 10px 10px 0 0;
 }
 
-.card .job_no {
-  color: #fff;
-  text-shadow: 0.5px 0.5px 2px #303030;
-  font-size: 1.3em;
-}
-
 .card .job_name {
   height: 40px;
+}
+
+.card hr {
+  margin-top: 0.5rem;
 }
 
 .card .img_placeholder {
