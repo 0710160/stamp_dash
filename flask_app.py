@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import desc
 from datetime import datetime
-from pytz import timezone
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.exceptions import HTTPException
 from werkzeug.utils import secure_filename
@@ -28,8 +27,6 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# Set timezone
-nz_tz = timezone('Pacific/Auckland')
 
 # Flask login manager
 login_manager = LoginManager()
@@ -100,7 +97,7 @@ def auth(user, action, job):
     if action.startswith("accessed"):
         pass
     else:
-        log_action = Log(timestamp=datetime.now().astimezone(nz_tz), action=f"User {auth_user.name} {action} job {job}")
+        log_action = Log(timestamp=datetime.now(), action=f"User {auth_user.name} {action} job {job}")
         db.session.add(log_action)
         db.session.commit()
     return auth_user.rights
@@ -167,7 +164,7 @@ def add():
             filename = f'job{job_no}'
             blank_img = open(os.path.join(app.config['UPLOAD_FOLDER'], filename), "w")
             blank_img.close()
-            current_date = datetime.now().astimezone(nz_tz).strftime('%d/%m/%Y')
+            current_date = datetime.now().strftime('%d/%m/%Y')
             try:
                 if request.form.getlist('is_stamp')[0]:
                     is_stamp = True
@@ -197,7 +194,7 @@ def edit(job_id):
                 file_exists = False
             return render_template("edit.html", file_exists=file_exists, job=edit_job, logged_in=current_user.is_authenticated)
         else:
-            current_date = datetime.now().astimezone(nz_tz).strftime('%d/%m/%Y')
+            current_date = datetime.now().strftime('%d/%m/%Y')
             if request.form["new_due_date"] == "":
                 pass
             else:
@@ -290,7 +287,7 @@ def complete(job_id):
     if auth(user=current_user.id, action="completed", job=complete_job.job_no) >= 1:
         if complete_job.is_stamp:
             complete_job.completed = True
-            current_date = datetime.now().astimezone(nz_tz).strftime('%d/%m/%Y')
+            current_date = datetime.now().strftime('%d/%m/%Y')
             complete_job.status = f'Printed {current_date}'
         else:
             db.session.delete(complete_job)
@@ -349,7 +346,7 @@ def plates(job_id):
     if auth(user=current_user.id, action="plates made for", job=job.job_no) >= 2:
         if job.plates_made:
             job.plates_made = False
-            current_date = datetime.now().astimezone(nz_tz).strftime('%d/%m/%Y')
+            current_date = datetime.now().strftime('%d/%m/%Y')
             job.status = f'Plates made {current_date}'
             db.session.commit()
         else:
@@ -369,7 +366,7 @@ def approved(job_id):
     if auth(user=current_user.id, action="approved", job=job.job_no) >= 3:
         if job.approved:
             job.approved = False
-            current_date = datetime.now().astimezone(nz_tz).strftime('%d/%m/%Y')
+            current_date = datetime.now().strftime('%d/%m/%Y')
             job.status = f'Proof approved {current_date}'
             db.session.commit()
         else:
@@ -482,7 +479,7 @@ def dashboard():
 def status(job_id):
     # Cycles through job status
     job_edit = Jobs.query.get(job_id)
-    current_date = datetime.now().astimezone(nz_tz).strftime('%d/%m/%Y')
+    current_date = datetime.now().strftime('%d/%m/%Y')
     if job_edit.status.startswith("Entered"):
         job_edit.status = f"On proof {current_date}"
     elif job_edit.status.startswith("On proof"):

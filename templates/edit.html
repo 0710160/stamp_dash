@@ -8,7 +8,7 @@
             <div class="custom-card custom-card-wide text-center animate-pop-in">
                 <div class="title">
                     <a href="/upload_img/{{ job.id }}">
-                        {% if file_exists %}
+                        {% if file_exists == True %}
                        <div class="job_img" style="background-image: url(/static/uploads/{{ job.img_name }});"></div>
                         {% endif %}
                     </a>
