@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Stamp Job Dashboard{% endblock title %}
 {% block heading %}Stamp Job Dashboard{% endblock heading %}
+{% block hide_footer %}hidden{% endblock hide_footer %}
 {% block content %}
 
 
@@ -18,10 +19,14 @@
                 </a>
             </div>
             <div class="details">
-                <div class="job_name"><h3>{{ i.job_no }} - {{ i.job_name }}</h3></div>
+                <a href="/edit/{{ i.id }}" target="_blank">
+                    <div class="job_name"><h3>{{ i.job_no }} - {{ i.job_name }}</h3></div>
+                </a>
                 <hr>
                 <h4>Due date: {{ i.due_date | datefilter }}</h4>
-                <a href="/status/{{ i.id }}">{{ i.status }}</a>
+                <a href="/status/{{ i.id }}">
+                    {{ i.status }}
+                </a>
                 <br><br>
                 {% if i.notes %}
                 <p>Notes: {{ i.notes }}</p>

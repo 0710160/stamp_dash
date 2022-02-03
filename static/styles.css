@@ -19,9 +19,7 @@ body {
   }
 
 footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%
+  width: 100%;
 }
 
 h1 {
@@ -95,7 +93,8 @@ label {
 
 .add-new {
   height: 80px;
-  width: 80px;
+  width: 80px!important;
+  font-size: 1rem!important;
   border-radius: 100px;
   position: fixed;
   right: 1.5%;
@@ -240,8 +239,8 @@ DASHBOARD
   position: absolute;
   background-image: url(gradienta-QWutu2BRpOs-unsplash.jpg);
   background-size: cover;
-  background-repeat: no-repeat;
-  height: 100vh;
+  background-repeat: repeat-y;
+  height: 100%;
   padding: 7% 5% 0 5%;
   z-index: -1;
 }
@@ -294,6 +293,8 @@ DASHBOARD
   height: 130px;
   border-radius: 10px 10px 0 0;
 }
+
+
 
 
 /*-----------------------------------------------------------------

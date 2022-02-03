@@ -3,7 +3,7 @@
 {% block heading%}Image Upload for {{ job.job_name }}{% endblock heading %}
 {% block content %}
 
-
+<div class="container-fluid">
 <!-- Heading Image -->
 <p>
 	{% with messages = get_flashed_messages() %}
@@ -17,6 +17,9 @@
 	{% endwith %}
 </p>
 
+<p>Upload image; fit size 300mm x 150mm</p>
+<br>
+
 <form method="post" action="/upload_img/{{ job.id }}" enctype="multipart/form-data">
     <dl>
 		<p>
@@ -27,6 +30,6 @@
 		<input type="submit" value="Submit">
 	</p>
 </form>
-</br></br>
+</div>
 
 {% endblock %}
