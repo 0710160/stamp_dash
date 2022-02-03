@@ -144,8 +144,12 @@ app.jinja_env.filters['datefilter'] = datefilter
 @login_required
 def home():
     # Displays all incomplete jobs and orders by priority
-    all_jobs = Jobs.query.order_by(Jobs.priority).filter(Jobs.completed == False)
-    return render_template("index.html", all_jobs=all_jobs, logged_in=current_user.is_authenticated)
+    auth_user = User.query.get(current_user.id)
+    if auth_user.rights > 0:
+        all_jobs = Jobs.query.order_by(Jobs.priority).filter(Jobs.completed == False)
+        return render_template("index.html", all_jobs=all_jobs, logged_in=current_user.is_authenticated)
+    else:
+        return redirect(url_for('login'))
 
 
 @app.route("/add", methods=["GET", "POST"])
@@ -401,7 +405,8 @@ def new_user():
             db.session.commit()
             login_user(new_db_entry, remember=True)
             TelegramBot.send_text(f"New user {name} created.\nGo to http://www.jobslist.scolour.co.nz/admin to approve.")
-            return redirect(url_for('home', logged_in=current_user.is_authenticated))
+            flash("Request sent to administrator for approval.")
+            return redirect(url_for('login'))
 
 
 @app.route('/login', methods=["GET", "POST"])

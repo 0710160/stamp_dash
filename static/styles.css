@@ -237,10 +237,9 @@ DASHBOARD
 -----------------------------------------------------------------*/
 .full-bg {
   position: absolute;
-  background-image: url(gradienta-QWutu2BRpOs-unsplash.jpg);
+  background-image: url(gradienta.jpg);
   background-size: cover;
   background-repeat: repeat-y;
-  height: 100%;
   padding: 7% 5% 0 5%;
   z-index: -1;
 }
