@@ -5,45 +5,52 @@
 
 <div class="container-fluid">
 
-    <h2 class="heading">Admin: Edit User</h2>
-    <hr>
-    <div class="row">
-        <div class="col-6 col-sm-3">
-    <form action="" method="POST">
+  <h2 class="heading">Admin: Edit User</h2>
+  <hr>
+  <div class="row">
+    <div class="col-lg-4 col-sm-12">
+      <form action="" method="POST">
         <label style="color:black;">User name:</label>
-        <input type="text", style="width:100px;", name="name">
+        <input type="text" , style="width:100px;" , name="name"><br>
         <label style="color:black;">Access rights:</label>
-        <input type="text", style="width:50px;", name="rights">
+        <input type="text" , style="width:50px;" , name="rights"><br>
         <label style="color:black;">New password:</label>
-        <input type="password", style="width:100px;", name="password">
+        <input type="password" , style="width:100px;" , name="password"><br>
         <br>
         <button class="btn btn-dark buttons" type="submit">Edit User</button>
         <a class="btn btn-secondary buttons" href="{{ url_for('home') }}">Return Home</a>
-    </form>
-            </div>
-        <div class="col-6 col-sm-3">
-    <ul>
+      </form>
+      <hr>
+    </div>
+    <div class="col-lg-4 col-sm-12">
+      <h2>User Rights Levels:</h2>
+      <ul>
         <li>5 = Admin (all rights)</li>
         <li>4 = Sort</li>
         <li>3 = Approve, Edit, Add New Job</li>
         <li>2 = Plates</li>
         <li>1 = Complete</li>
         <li>0 = Read Only</li>
-    </ul>
-            </div>
-        </div>
-    <br><hr>
-    <h2>Current User List:</h2>
-    {% for user in users: %}
-    <li>{{ user.name }}: {{ user.rights }}</li>
-    {% endfor %}
-    <br><hr>
-    <h2>User Action Log:</h2>
-    <div style="height:300px;width:700px;overflow:auto;">
-        {% for log in all_logs %}
-            <ul>{{ log.timestamp}} - {{ log.action }}</ul>
-        {% endfor %}
+      </ul>
     </div>
+    <hr>
+    <div class="col-lg-4 col-sm-12">
+      <h2>Current User List:</h2>
+      <ul>
+        {% for user in users: %}
+        <li>{{ user.name }}: {{ user.rights }}</li>
+        {% endfor %}
+      </ul>
+      <hr>
+    </div>
+  </div>
+
+  <h2>User Action Log:</h2>
+  <div style="height:300px;width:700px;overflow:auto;">
+    {% for log in all_logs %}
+    <ul>{{ log.timestamp}} - {{ log.action }}</ul>
+    {% endfor %}
+  </div>
 </div>
 
 {% endblock %}

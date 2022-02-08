@@ -4,7 +4,6 @@ from sqlalchemy import desc
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.exceptions import HTTPException
-from werkzeug.utils import secure_filename
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 from telegram_bot import TelegramBot
 from dotenv import load_dotenv
@@ -16,7 +15,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 UPLOAD_FOLDER = 'static/uploads/'
 #UPLOAD_FOLDER = '/home/0710160/mysite/static/uploads'
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
+ALLOWED_EXTENSIONS = set(['webp', 'png', 'jpg', 'jpeg'])
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
@@ -31,6 +30,7 @@ db = SQLAlchemy(app)
 # Flask login manager
 login_manager = LoginManager()
 login_manager.init_app(app)
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -143,7 +143,7 @@ app.jinja_env.filters['datefilter'] = datefilter
 @app.route("/")
 @login_required
 def home():
-    # Displays all incomplete jobs and orders by priority
+    # Displays all incomplete jobs and orders by priority if user is authorized
     auth_user = User.query.get(current_user.id)
     if auth_user.rights > 0:
         all_jobs = Jobs.query.order_by(Jobs.priority).filter(Jobs.completed == False)
@@ -169,6 +169,7 @@ def add():
             blank_img = open(os.path.join(app.config['UPLOAD_FOLDER'], filename), "w")
             blank_img.close()
             current_date = datetime.now().strftime('%d/%m/%Y')
+            is_stamp = False
             try:
                 if request.form.getlist('is_stamp')[0]:
                     is_stamp = True
@@ -393,10 +394,7 @@ def new_user():
             salt_length=8
         )
         name = request.form["name"]
-        new_db_entry = User(
-            password=password,
-            name=name
-        )
+        new_db_entry = User(password=password, name=name)
         if User.query.filter_by(name=name).first():
             flash("This username is already in use.")
             return redirect(url_for('login'))
