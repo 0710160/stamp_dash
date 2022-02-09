@@ -295,6 +295,7 @@ def complete(job_id):
             current_date = datetime.now().strftime('%d/%m/%Y')
             complete_job.status = f'Printed {current_date}'
         else:
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], complete_job.img_name))
             db.session.delete(complete_job)
         db.session.commit()
         TelegramBot.send_text(f"Job {job_name} completed.")
@@ -461,17 +462,13 @@ def admin():
         return redirect(url_for('home', logged_in=current_user.is_authenticated))
 
 
-@app.route("/dashboard", methods=["GET", "POST"])
+@app.route("/dashboard")
 @login_required
 def dashboard():
     # Displays all jobs and orders by priority
     if auth(user=current_user.id, action="accessed dashboard", job='N/A') >= 5:
-        if request.method == "GET":
-            stamp_jobs = Jobs.query.order_by(Jobs.due_date).filter(Jobs.is_stamp == True)
-            return render_template("dashboard.html", all_jobs=stamp_jobs, logged_in=current_user.is_authenticated)
-        else:
-            pass
-            ## This is where the POST stuff goes
+        stamp_jobs = Jobs.query.order_by(Jobs.due_date).filter(Jobs.is_stamp == True)
+        return render_template("dashboard.html", all_jobs=stamp_jobs, logged_in=current_user.is_authenticated)
     else:
         flash("You are not authorized to perform this action.")
         return redirect(url_for('home', logged_in=current_user.is_authenticated))
@@ -502,6 +499,7 @@ def status(job_id):
         job_edit.status = f"Dispatched {current_date}"
     elif job_edit.status.startswith("Dispatched "):
         db.session.delete(job_edit)
+        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], job_edit.img_name))
     else:
         job_edit.status = job_edit.status
     db.session.commit()
