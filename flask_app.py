@@ -77,8 +77,10 @@ def refresh_priority():
     all_jobs = Jobs.query.order_by(Jobs.priority).all()
     new_priority = 1
     for job in all_jobs:
-        job.priority = new_priority
-        new_priority += 1
+        if not job.completed: #exclude already printed stamp jobs
+            job.priority = new_priority
+            new_priority += 1
+            print(job.job_name, job.priority)
     db.session.commit()
 
 
@@ -90,7 +92,7 @@ def auth(user, action, job):
         3 = Approve, Edit, Add New Job
         2 = Plates
         1 = Complete
-        0 = Read only
+        0 = No access
     Logs actions to log.db
     '''
     auth_user = User.query.get(user)

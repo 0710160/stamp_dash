@@ -13,6 +13,7 @@
 * add.html adds a job to the list displayed on index.html with ability to add due date and job notes.
 * edit.html edits the priority, due date or notes on a job, or deletes a job from the database.
 * admin.html allows admin to assign an authorization level to new users and to view logs of add activity on the site.
+* dashboard.html shows all of the current stamp jobs sorted by due date with their respective images, and tracks the status of each going through the factory.
 
 ## Feature Wishlist
 * Self-hosted site linking to Tharstern SQL.
