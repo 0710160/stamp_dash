@@ -14,18 +14,17 @@ load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 UPLOAD_FOLDER = 'static/uploads/'
-#UPLOAD_FOLDER = '/home/0710160/mysite/static/uploads'
+# UPLOAD_FOLDER = '/home/0710160/mysite/static/uploads'
 ALLOWED_EXTENSIONS = set(['webp', 'png', 'jpg', 'jpeg'])
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
-#app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL2")
+# app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL2")
 app.config['SQLALCHEMY_DATABASE_URI'] = ("sqlite:///production_schedule.sqlite3")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-
 
 # Flask login manager
 login_manager = LoginManager()
@@ -59,7 +58,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250))
     password = db.Column(db.String(100))
-    rights = db.Column(db.Integer, default=0)  #0 is read-only, 5 is admin
+    rights = db.Column(db.Integer, default=0)  # 0 is read-only, 5 is admin
 
 
 class Log(db.Model):
@@ -69,18 +68,16 @@ class Log(db.Model):
     action = db.Column(db.String(100))
 
 
-#db.create_all()
+# db.create_all()
 
 
 def refresh_priority():
     ''' Function to count all jobs in DB and re-arrange based on priority where 1 is highest '''
-    all_jobs = Jobs.query.order_by(Jobs.priority).all()
+    all_jobs = Jobs.query.order_by(Jobs.priority).filter(Jobs.completed == False)
     new_priority = 1
     for job in all_jobs:
-        if not job.completed: #exclude already printed stamp jobs
-            job.priority = new_priority
-            new_priority += 1
-            print(job.job_name, job.priority)
+        job.priority = new_priority
+        new_priority += 1
     db.session.commit()
 
 
@@ -107,7 +104,7 @@ def auth(user, action, job):
 
 def plates_resort(job):
     '''Re-sorts job order based on new confirmed+plated job'''
-    all_jobs = Jobs.query.order_by(Jobs.priority).all()
+    all_jobs = Jobs.query.order_by(Jobs.priority).filter(Jobs.completed == False)
     mark = 0
     for i in all_jobs:
         if i.approved and i.plates_made and not i.job_no == job.job_no:
@@ -118,7 +115,7 @@ def plates_resort(job):
 
 def date_resort(job):
     '''Re-sorts job order based on new job's due date'''
-    all_jobs = Jobs.query.order_by(Jobs.priority).all()
+    all_jobs = Jobs.query.order_by(Jobs.priority).filter(Jobs.completed == False)
     mark = 0
     for i in all_jobs:
         added_job_date = i.due_date.strftime("%d%m%y")
@@ -178,7 +175,8 @@ def add():
             except IndexError:
                 is_stamp = False
             status = f'Entered {current_date}'
-            add_job = Jobs(job_no=job_no, job_name=job_name, due_date=due_date, notes=notes, status=status, img_name=f'job{job_no}', is_stamp=is_stamp)
+            add_job = Jobs(job_no=job_no, job_name=job_name, due_date=due_date, notes=notes, status=status,
+                           img_name=f'job{job_no}', is_stamp=is_stamp)
             db.session.add(add_job)
             db.session.commit()
             date_resort(add_job)
@@ -199,7 +197,8 @@ def edit(job_id):
                 file_exists = True
             else:
                 file_exists = False
-            return render_template("edit.html", file_exists=file_exists, job=edit_job, logged_in=current_user.is_authenticated)
+            return render_template("edit.html", file_exists=file_exists, job=edit_job,
+                                   logged_in=current_user.is_authenticated)
         else:
             current_date = datetime.now().strftime('%d/%m/%Y')
             if request.form["new_due_date"] == "":
@@ -278,7 +277,7 @@ def upload_img(job_id):
                 job.img_name = filename
                 db.session.commit()
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                #print('upload_image filename: ' + new_filename)
+                # print('upload_image filename: ' + new_filename)
                 return redirect(url_for('edit', job_id=job_id, logged_in=current_user.is_authenticated))
     else:
         flash("You are not authorized to perform this action.")
@@ -405,7 +404,8 @@ def new_user():
             db.session.add(new_db_entry)
             db.session.commit()
             login_user(new_db_entry, remember=True)
-            TelegramBot.send_text(f"New user {name} created.\nGo to http://www.jobslist.scolour.co.nz/admin to approve.")
+            TelegramBot.send_text(
+                f"New user {name} created.\nGo to http://www.jobslist.scolour.co.nz/admin to approve.")
             flash("Request sent to administrator for approval.")
             return redirect(url_for('login'))
 
@@ -441,7 +441,8 @@ def admin():
         if request.method == "GET":
             all_logs = Log.query.order_by(desc(Log.timestamp)).all()
             all_users = User.query.all()
-            return render_template("admin.html", all_logs=all_logs, users=all_users, logged_in=current_user.is_authenticated)
+            return render_template("admin.html", all_logs=all_logs, users=all_users,
+                                   logged_in=current_user.is_authenticated)
         else:
             name = request.form["name"]
             user = db.session.query(User).filter_by(name=name).first()
