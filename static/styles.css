@@ -101,9 +101,10 @@ label {
   bottom: 3%;
   padding: 10px;
   box-shadow: 4px 3px 8px 1px #969696;
-  background: #7474BF;  /* fallback for old browsers */
-  background: -webkit-linear-gradient(to right, #348AC7, #7474BF);  /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(to right, #348AC7, #7474BF); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: #C927D0;
+  background: -webkit-linear-gradient(bottom right, #C927D0, #2ED5D6);
+  background: -moz-linear-gradient(bottom right, #C927D0, #2ED5D6);
+  background: linear-gradient(to top left, #C927D0, #2ED5D6);
   color: #fff;
 }
 
@@ -227,14 +228,6 @@ FLASK FORMS WITH GRADIENT BOX
   width: 300px;
   }
 
-.job_img {
-  width: 300px;
-  height: 150px;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  display: inline-block;
-}
 
 /*-----------------------------------------------------------------
 DASHBOARD
@@ -249,7 +242,7 @@ DASHBOARD
 }
 
 .card {
-  width: 250px;
+  width: 260px;
   background-color: rgba(255, 255, 255, 0.8);
   margin: 1%;
   border-radius: 10px;
@@ -264,13 +257,18 @@ DASHBOARD
   font-size: 1.2em;
   }
 
+.aspect-box {
+  aspect-ratio: 2.6;
+}
+
 .card .job_img {
-  width: 250px;
-  height: 130px;
-  background-size: contain;
+  /*width: 260px;
+  height: 100px;
   background-repeat: no-repeat;
-  background-position: center;
-  display: inline-block;
+  background-position: center;*/
+  object-fit: cover;
+  height: max(100px, 100%);
+  width: max(260px, 100%);
   border-radius: 10px 10px 0 0;
 }
 
@@ -296,8 +294,6 @@ DASHBOARD
   height: 130px;
   border-radius: 10px 10px 0 0;
 }
-
-
 
 
 /*-----------------------------------------------------------------

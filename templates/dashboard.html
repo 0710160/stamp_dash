@@ -10,10 +10,10 @@
     <div class="d-flex flex-wrap">
         {% for i in all_jobs %}
         <div class="card">
-            <div class="title header_img">
+            <div class="title header_img aspect-box">
                 <a href="/upload_img/{{ i.id }}">
                     {% if i.img_name %}
-                    <div class="job_img" style="background-image: url(/static/uploads/{{ i.img_name }});"></div>
+                    <img src="/static/uploads/{{ i.img_name }}" class="job_img">
                     {% else %}
                     <i class="fa fa-edit img_placeholder" aria-hidden="true"></i>
                     {% endif %}
