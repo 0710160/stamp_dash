@@ -146,7 +146,10 @@ def home():
     auth_user = User.query.get(current_user.id)
     if auth_user.rights > 0:
         all_jobs = Jobs.query.order_by(Jobs.priority).filter(Jobs.completed == False)
-        return render_template("index.html", all_jobs=all_jobs, logged_in=current_user.is_authenticated)
+        return render_template("index.html",
+                               all_jobs=all_jobs,
+                               logged_in=current_user.is_authenticated,
+                               user_rights=auth_user.rights)
     else:
         return redirect(url_for('login'))
 
@@ -175,8 +178,13 @@ def add():
             except IndexError:
                 is_stamp = False
             status = f'Entered {current_date}'
-            add_job = Jobs(job_no=job_no, job_name=job_name, due_date=due_date, notes=notes, status=status,
-                           img_name=f'job{job_no}', is_stamp=is_stamp)
+            add_job = Jobs(job_no=job_no,
+                           job_name=job_name,
+                           due_date=due_date,
+                           notes=notes,
+                           status=status,
+                           img_name=f'job{job_no}',
+                           is_stamp=is_stamp)
             db.session.add(add_job)
             db.session.commit()
             date_resort(add_job)
@@ -197,7 +205,9 @@ def edit(job_id):
                 file_exists = True
             else:
                 file_exists = False
-            return render_template("edit.html", file_exists=file_exists, job=edit_job,
+            return render_template("edit.html",
+                                   file_exists=file_exists,
+                                   job=edit_job,
                                    logged_in=current_user.is_authenticated)
         else:
             current_date = datetime.now().strftime('%d/%m/%Y')
@@ -261,7 +271,9 @@ def upload_img(job_id):
     job = Jobs.query.get(job_id)
     if auth(user=current_user.id, action="completed", job=job.job_no) >= 4:
         if request.method == 'GET':
-            return render_template('upload_img.html', job=job, logged_in=current_user.is_authenticated)
+            return render_template('upload_img.html',
+                                   job=job,
+                                   logged_in=current_user.is_authenticated)
         if request.method == 'POST':
             # check if the post request has the file part
             if 'file' not in request.files:
@@ -278,7 +290,9 @@ def upload_img(job_id):
                 db.session.commit()
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                 # print('upload_image filename: ' + new_filename)
-                return redirect(url_for('edit', job_id=job_id, logged_in=current_user.is_authenticated))
+                return redirect(url_for('edit',
+                                        job_id=job_id,
+                                        logged_in=current_user.is_authenticated))
     else:
         flash("You are not authorized to perform this action.")
         return redirect(url_for('home', logged_in=current_user.is_authenticated))
@@ -441,7 +455,9 @@ def admin():
         if request.method == "GET":
             all_logs = Log.query.order_by(desc(Log.timestamp)).all()
             all_users = User.query.all()
-            return render_template("admin.html", all_logs=all_logs, users=all_users,
+            return render_template("admin.html",
+                                   all_logs=all_logs,
+                                   users=all_users,
                                    logged_in=current_user.is_authenticated)
         else:
             name = request.form["name"]
@@ -471,7 +487,9 @@ def dashboard():
     # Displays all jobs and orders by priority
     if auth(user=current_user.id, action="accessed dashboard", job='N/A') >= 5:
         stamp_jobs = Jobs.query.order_by(Jobs.due_date).filter(Jobs.is_stamp == True)
-        return render_template("dashboard.html", all_jobs=stamp_jobs, logged_in=current_user.is_authenticated)
+        return render_template("dashboard.html",
+                               all_jobs=stamp_jobs,
+                               logged_in=current_user.is_authenticated)
     else:
         flash("You are not authorized to perform this action.")
         return redirect(url_for('home', logged_in=current_user.is_authenticated))
@@ -488,15 +506,15 @@ def status(job_id):
     elif job_edit.status.startswith("On proof"):
         job_edit.status = f"Proof approved {current_date}"
         job_edit.approved = True
+        plates_resort(job_edit)
     elif job_edit.status.startswith("Proof approved"):
         job_edit.status = f"Plates made {current_date}"
         job_edit.plates_made = True
+        plates_resort(job_edit)
     elif job_edit.status.startswith("Plates made"):
         job_edit.status = f"Printed {current_date}"
         job_edit.completed = True
     elif job_edit.status.startswith("Printed"):
-        job_edit.status = f"Perforated {current_date}"
-    elif job_edit.status.startswith("Perforated"):
         job_edit.status = f"Check & pack {current_date}"
     elif job_edit.status.startswith("Check"):
         job_edit.status = f"Dispatched {current_date}"

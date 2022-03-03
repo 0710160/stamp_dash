@@ -55,6 +55,8 @@
     </tbody>
 </table>
 
+    {% if user_rights > 2 %}
 <a class="btn buttons add-new" href="{{ url_for('add') }}">Add new job</a>
+    {% endif %}
 </div>
 {% endblock %}
