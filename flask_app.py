@@ -290,7 +290,7 @@ def upload_img(job_id):
                 db.session.commit()
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                 # print('upload_image filename: ' + new_filename)
-                return redirect(url_for('edit',
+                return redirect(url_for('dashboard',
                                         job_id=job_id,
                                         logged_in=current_user.is_authenticated))
     else:
