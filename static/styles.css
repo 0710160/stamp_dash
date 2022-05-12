@@ -234,6 +234,7 @@ DASHBOARD
 -----------------------------------------------------------------*/
 .full-bg {
   position: absolute;
+  padding-bottom: 75px;
   background-image: url(gradienta.webp);
   background-size: cover;
   background-repeat: repeat-y;
@@ -342,4 +343,3 @@ MEDIA QUERIES
     background-size: contain;
   }
 }
-
