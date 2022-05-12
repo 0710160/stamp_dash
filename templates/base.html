@@ -5,7 +5,7 @@
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='favicon.png') }}" sizes="180x180">
     <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" sizes="32x32" type="image/png">
-    <title>SCP Jobs List</title>
+    <title>{% block title %}{% endblock title %}</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,23 +25,25 @@
     <a class="navbar-brand" href="{{ url_for('home') }}">
         <img src="{{ url_for('static', filename='favicon.png') }}" alt="logo", width="60", class="d-inline-block align-text-top">
     </a>
-    <h1>Press-Ready Jobs List</h1>
+    <h1>{% block heading %}{% endblock heading %}</h1>
   <div class="collapse navbar-collapse">
     <ul class="navbar-nav ml-auto">
       <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('home') }}">Home</a>
+        <a class="nav-link {% block home_active %}{% endblock home_active %}" href="{{ url_for('home') }}">Home</a>
       </li>
        {% if not logged_in: %}
       <li class="nav-item">
-        <a class="nav-link" href="/login">Login</a>
+        <a class="nav-link {% block login_active %}{% endblock login_active %}" href="/login">Login</a>
       </li>
         <li class="nav-item">
-        <a class="nav-link" href="/new_user">New User</a>
+        <a class="nav-link {% block user_active %}{% endblock user_active %}" href="/new_user">New User</a>
       </li>
         <li class="nav-item">
             <a class="nav-link disabled">Admin</a>
+            <a class="nav-link disabled">Dashboard</a>
             {% else %}
-            <a class="nav-link" href="/admin">Admin</a>
+            <a class="nav-link {% block admin_active %}{% endblock admin_active %}" href="/admin">Admin</a>
+            <a class="nav-link {% block dash_active %}{% endblock dash_active %}" href="/dashboard">Stamp Dashboard</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="/logout">Log Out</a>
@@ -53,11 +55,11 @@
   </div>
 </nav>
        {% block content %}
-       {% endblock %}
+       {% endblock content %}
 </body>
-<footer>
+<footer {% block hide_footer %}{% endblock hide_footer %}>
     <div>
-    <p class="text-center text-muted">2021 Southern Colour Print</p>
+    <p class="text-center text-muted">2022 Southern Colour Print</p>
     </div>
 </footer>
 </html>

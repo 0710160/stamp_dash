@@ -5,12 +5,22 @@
   --text-color: #334257;
   }
 
+html {
+  position: relative;
+  min-height: 100%;
+}
+
 body {
   display: flex;
   flex-direction: column;
   font-family: 'Roboto', sans-serif;
   background-color: var(--bg-color);
+  height: 100%;
   }
+
+footer {
+  width: 100%;
+}
 
 h1 {
   font-weight: 700;
@@ -41,10 +51,20 @@ p {
   padding: 0;
   }
 
+.navbar {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
 th {
   font-size: 1.1em;
   color: var(--heading-color);
   }
+
+thead th {
+  background-color: #fff;
+  position: sticky;
+  top: 0;
+}
 
 .job-rtg {
   background: rgba(47, 213, 214, 0.2);
@@ -71,6 +91,23 @@ label {
   display: inline-block;
   }
 
+.add-new {
+  height: 80px;
+  width: 80px!important;
+  font-size: 1rem!important;
+  border-radius: 100px;
+  position: fixed;
+  right: 1.5%;
+  bottom: 3%;
+  padding: 10px;
+  box-shadow: 4px 3px 8px 1px #969696;
+  background: #C927D0;
+  background: -webkit-linear-gradient(bottom right, #C927D0, #2ED5D6);
+  background: -moz-linear-gradient(bottom right, #C927D0, #2ED5D6);
+  background: linear-gradient(to top left, #C927D0, #2ED5D6);
+  color: #fff;
+}
+
 table .buttons {
   margin-top: 0;
   }
@@ -79,13 +116,14 @@ table .buttons {
   color: #384B52;
   }
 
+
 /*-------------------------------------------------------------------------------------
 FLASK FORMS WITH GRADIENT BOX
 -------------------------------------------------------------------------------------*/
 .form-container {
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
-          padding: 100px 0;
+          padding: 50px 0;
 }
 
 .custom-card {
@@ -154,6 +192,10 @@ FLASK FORMS WITH GRADIENT BOX
   font-size: 0.8em;
   }
 
+.card_form h4 {
+  margin: 5px;
+}
+
 .form-action {
   position: relative;
   z-index: 2;
@@ -185,6 +227,74 @@ FLASK FORMS WITH GRADIENT BOX
 .custom-card-wide input, textarea {
   width: 300px;
   }
+
+
+/*-----------------------------------------------------------------
+DASHBOARD
+-----------------------------------------------------------------*/
+.full-bg {
+  position: absolute;
+  background-image: url(gradienta.webp);
+  background-size: cover;
+  background-repeat: repeat-y;
+  padding: 7% 5% 75px 5%;
+  z-index: -1;
+}
+
+.card {
+  width: 260px;
+  background-color: rgba(255, 255, 255, 0.8);
+  margin: 1%;
+  border-radius: 10px;
+  border: none;
+}
+
+.card h4 {
+  color: var(--text-color);
+}
+
+.card h3 {
+  font-size: 1.2em;
+  }
+
+.aspect-box {
+  aspect-ratio: 2.6;
+}
+
+.card .job_img {
+  /*width: 260px;
+  height: 100px;
+  background-repeat: no-repeat;
+  background-position: center;*/
+  object-fit: cover;
+  height: max(100px, 100%);
+  width: max(260px, 100%);
+  border-radius: 10px 10px 0 0;
+}
+
+.card .job_name {
+  height: 40px;
+}
+
+.card hr {
+  margin-top: 0.5rem;
+}
+
+.card .img_placeholder {
+  position: relative;
+  left: 25%;
+}
+
+.details {
+  padding: 10px;
+  font-size: 80%;
+}
+
+.header_img {
+  height: 130px;
+  border-radius: 10px 10px 0 0;
+}
+
 
 /*-----------------------------------------------------------------
 ANIMATIONS
@@ -225,4 +335,10 @@ MEDIA QUERIES
     h4,a,p,th {
         font-size: 0.9em;
     }
+}
+
+@media only screen and (max-width: 600px) {
+  .full-bg {
+    background-size: contain;
+  }
 }

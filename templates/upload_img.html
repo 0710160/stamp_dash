@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Press-Ready Jobs List{% endblock title %}
+{% block heading%}Image Upload for {{ job.job_name }}{% endblock heading %}
+{% block content %}
+
+<div class="container-fluid">
+<!-- Heading Image -->
+<p>
+	{% with messages = get_flashed_messages() %}
+	  {% if messages %}
+		<ul>
+		{% for message in messages %}
+		  <li>{{ message }}</li>
+		{% endfor %}
+		</ul>
+	  {% endif %}
+	{% endwith %}
+</p>
+
+<p>Upload image; fit size 260mm x 100mm, preferred file format .webp</p>
+<br>
+
+<form method="post" action="/upload_img/{{ job.id }}" enctype="multipart/form-data">
+    <dl>
+		<p>
+			<input type="file" name="file" autocomplete="off" required>
+		</p>
+    </dl>
+    <p>
+		<input type="submit" value="Submit">
+	</p>
+</form>
+</div>
+
+{% endblock %}
