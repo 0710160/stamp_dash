@@ -234,11 +234,10 @@ DASHBOARD
 -----------------------------------------------------------------*/
 .full-bg {
   position: absolute;
-  padding-bottom: 75px;
   background-image: url(gradienta.webp);
   background-size: cover;
   background-repeat: repeat-y;
-  padding: 7% 5% 0 5%;
+  padding: 7% 5% 75px 5%;
   z-index: -1;
 }
 
