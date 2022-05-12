@@ -68,6 +68,7 @@ class Log(db.Model):
     action = db.Column(db.String(100))
 
 
+#what the heck is this thing
 <<<<<<< HEAD
 # db.create_all()
 =======
@@ -164,9 +165,9 @@ def home():
         return redirect(url_for('login'))
 
 
-@app.route("/add", methods=["GET", "POST"])
+@app.route("/add/<referrer>", methods=["GET", "POST"])
 @login_required
-def add():
+def add(referrer):
     # Currently manually adds jobs, later will import automatically from SQL
     if auth(user=current_user.id, action="added", job="{new}") >= 3:
         if request.method == "GET":
@@ -198,7 +199,10 @@ def add():
             db.session.add(add_job)
             db.session.commit()
             date_resort(add_job)
-            return redirect(url_for('home', logged_in=current_user.is_authenticated))
+            if referrer == 'i':
+                return redirect(url_for('home', logged_in=current_user.is_authenticated))
+            else:
+                return redirect(url_for('dashboard', logged_in=current_user.is_authenticated))
     else:
         flash("You are not authorized to perform this action.")
         return redirect(url_for('home', logged_in=current_user.is_authenticated))
