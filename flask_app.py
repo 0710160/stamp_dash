@@ -68,13 +68,22 @@ class Log(db.Model):
     action = db.Column(db.String(100))
 
 
+<<<<<<< HEAD
 # db.create_all()
+=======
+#db.create_all()
+>>>>>>> main
 
 
 def refresh_priority():
     ''' Function to count all jobs in DB and re-arrange based on priority where 1 is highest '''
+<<<<<<< HEAD
     all_jobs = Jobs.query.order_by(Jobs.priority).filter(Jobs.completed == False)
     new_priority = 1
+=======
+    all_jobs = Jobs.query.order_by(Jobs.priority).all()
+    new_priority = 0
+>>>>>>> main
     for job in all_jobs:
         job.priority = new_priority
         new_priority += 1
@@ -109,6 +118,7 @@ def plates_resort(job):
     for i in all_jobs:
         if i.approved and i.plates_made and not i.job_no == job.job_no:
             mark += 1
+            print(i.job_no, mark)
     job.priority = mark + 0.5
     refresh_priority()
 

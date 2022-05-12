@@ -7,35 +7,42 @@
 
 
 <div class="container-fluid full-bg">
-    <div class="d-flex flex-wrap">
-        {% for i in all_jobs %}
-        <div class="card">
-            <div class="title header_img aspect-box">
-                <a href="/upload_img/{{ i.id }}">
-                    {% if i.img_name %}
-                    <img src="/static/uploads/{{ i.img_name }}" class="job_img">
-                    {% else %}
-                    <i class="fa fa-edit img_placeholder" aria-hidden="true"></i>
-                    {% endif %}
-                </a>
-            </div>
-            <div class="details">
-                <a href="/edit/{{ i.id }}" target="_blank">
-                    <div class="job_name"><h3>{{ i.job_no }} - {{ i.job_name }}</h3></div>
-                </a>
-                <hr>
-                <h4>Due date: {{ i.due_date | datefilter }}</h4>
-                <a href="/status/{{ i.id }}">
-                    {{ i.status }}
-                </a>
-                <br><br>
-                {% if i.notes %}
-                <p>Notes: {{ i.notes }}</p>
-                {% endif %}
-            </div>
-        </div>
-        {% endfor %}
+  <div class="d-flex flex-wrap">
+    {% for i in all_jobs %}
+    <div class="card">
+      <div class="title header_img aspect-box">
+        <a href="/upload_img/{{ i.id }}">
+          {% if i.img_name %}
+          <img src="/static/uploads/{{ i.img_name }}" class="job_img">
+          {% else %}
+          <i class="fa fa-edit img_placeholder" aria-hidden="true"></i>
+          {% endif %}
+        </a>
+      </div>
+      <div class="details">
+        <a href="/edit/{{ i.id }}" target="_blank">
+          <div class="job_name">
+            <h3>{{ i.job_no }} - {{ i.job_name }}</h3>
+          </div>
+        </a>
+        <hr>
+        <h4>Due date: {{ i.due_date | datefilter }}</h4>
+        <a href="/status/{{ i.id }}">
+          {{ i.status }}
+        </a>
+        <br><br>
+        {% if i.notes %}
+        <p>Notes: {{ i.notes }}</p>
+        {% endif %}
+      </div>
     </div>
+    {% endfor %}
+  </div>
+
+  {% if user_rights > 2 %}
+  <a class="btn buttons add-new" href="{{ url_for('add') }}">Add new job</a>
+  {% endif %}
+
 </div>
 
 

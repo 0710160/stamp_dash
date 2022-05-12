@@ -7,56 +7,59 @@
 {% with messages = get_flashed_messages() %}
 {% if messages %}
 <ul class=flashes>
-    {% for message in messages %}
-    {{ message }}
-    {% endfor %}
+  {% for message in messages %}
+  {{ message }}
+  {% endfor %}
 </ul>
 {% endif %}
 {% endwith %}
 
 <div class="container-fluid">
-<table class="table">
+  <table class="table">
     <thead>
-    <tr>
+      <tr>
         <th scope="col">Job No. (Sort)</th>
         <th scope="col">Job Description</th>
         <th scope="col">Due Date</th>
         <th scope="col">Approved?</th>
         <th scope="col">Plates Made?</th>
         <th scope="col">Complete Job</th>
-    </tr>
+      </tr>
     </thead>
 
     <tbody>
-    {% for job in all_jobs %}
-    {% if job.approved == True and job.plates_made == True %}
-    <tr class="job-rtg">
-    {% else %}
-    <tr>
+      {% for job in all_jobs %}
+      {% if job.approved == True and job.plates_made == True %}
+      <tr class="job-rtg">
+        {% else %}
+      <tr>
         {% endif %}
         <td>
-            <a href="/priority_up/{{ job.id }}"><i class="fas fa-chevron-up" data-fa-transform="left-6"></i></a>
-            <a href="/edit/{{ job.id }}"> {{ job.job_no }} </a>
-            <a href="/priority_down/{{ job.id }}"><i class="fas fa-chevron-down" data-fa-transform="right-6"></i></a>
+          <a href="/priority_up/{{ job.id }}"><i class="fas fa-chevron-up" data-fa-transform="left-6"></i></a>
+          <a href="/edit/{{ job.id }}"> {{ job.job_no }} </a>
+          <a href="/priority_down/{{ job.id }}"><i class="fas fa-chevron-down" data-fa-transform="right-6"></i></a>
         </td>
-        <td><p>{{ job.job_name }}</p>
-            {% if job.notes %}
-            <p class="notes">  Notes: {{ job.notes }}</p>
-            {% endif %}
+        <td>
+          <p>{{ job.job_name }}</p>
+          {% if job.notes %}
+          <p class="notes"> Notes: {{ job.notes }}</p>
+          {% endif %}
         </td>
-        <td><p>{{ job.due_date | datefilter }}</p></td>
+        <td>
+          <p>{{ job.due_date | datefilter }}</p>
+        </td>
         <td><a href="approved/{{ job.id }}">{{ job.approved }}</a></td>
         <td><a href="plates/{{ job.id }}">{{ job.plates_made }}</a></td>
         {% if job.approved == True and job.plates_made == True %}
         <td><a class="btn btn-light buttons" href="/complete/{{ job.id }}">Complete Job</a></td>
         {% endif %}
-    </tr>
-    {% endfor %}
+      </tr>
+      {% endfor %}
     </tbody>
-</table>
+  </table>
 
-    {% if user_rights > 2 %}
-<a class="btn buttons add-new" href="{{ url_for('add') }}">Add new job</a>
-    {% endif %}
+  {% if user_rights > 2 %}
+  <a class="btn buttons add-new" href="{{ url_for('add') }}">Add new job</a>
+  {% endif %}
 </div>
 {% endblock %}
