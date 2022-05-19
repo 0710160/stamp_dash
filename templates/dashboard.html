@@ -9,7 +9,7 @@
 <div class="container-fluid full-bg">
   <div class="d-flex flex-wrap">
     {% for i in all_jobs %}
-    <div class="card">
+    <div class="card job-card">
       <div class="title header_img aspect-box">
         <a href="/upload_img/{{ i.id }}">
           {% if i.img_name %}
@@ -39,7 +39,36 @@
     {% endfor %}
   </div>
 
-  <a class="btn buttons add-new" href="/add/d">Add new job</a>
+  <div class="quote-card row">
+    <div class="container-flex quote-big-box col">
+      <h3>Quotes To-Do List</h3>
+      {% for t in to_do_quotes %}
+      <ul>
+        <li>
+          <h5>{{ t.job_name }}</h5>
+          <h4>Due date: {{ t.due_date | datefilter }}</h4>
+          <a class="btn btn-primary won" href="/complete_quote/{{ t.id }}">Done</a>
+          <a class="btn btn-warning lost" href="/delete/{{ t.id }}">Delete</a>
+        </li>
+      </ul>
+      {% endfor %}
+      </div>
+
+    <div class="container-flex quote-big-box col">
+      <h3>Outstanding Quotes</h3>
+      {% for q in outstanding_quotes %}
+      <ul>
+        <li>
+          <h5>{{ q.job_name }}</h5>
+          <a class="btn btn-primary won" href="/add_job/{{ q.id }}">Won</a>
+          <a class="btn btn-warning lost" href="/delete/{{ q.id }}">Lost</a>
+        </li>
+      </ul>
+      {% endfor %}
+    </div>
+  </div>
+
+  <a class="btn buttons add-new" href="/add_quote">Add new quote</a>
 
 </div>
 

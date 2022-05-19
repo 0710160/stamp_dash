@@ -44,7 +44,7 @@ class Jobs(db.Model):
     due_date = db.Column(db.Date)
     priority = db.Column(db.Float, default=9)
     plates_made = db.Column(db.Boolean, default=False)
-    scheduled = db.Column(db.Boolean, default=False)
+    scheduled = db.Column(db.Integer, default=False)
     approved = db.Column(db.Boolean, default=False)
     completed = db.Column(db.Boolean, default=False)
     status = db.Column(db.String)
@@ -68,23 +68,15 @@ class Log(db.Model):
     action = db.Column(db.String(100))
 
 
-#what the heck is this thing
-<<<<<<< HEAD
-# db.create_all()
-=======
-#db.create_all()
->>>>>>> main
+db.create_all()
 
 
 def refresh_priority():
     ''' Function to count all jobs in DB and re-arrange based on priority where 1 is highest '''
-<<<<<<< HEAD
     all_jobs = Jobs.query.order_by(Jobs.priority).filter(Jobs.completed == False)
     new_priority = 1
-=======
     all_jobs = Jobs.query.order_by(Jobs.priority).all()
     new_priority = 0
->>>>>>> main
     for job in all_jobs:
         job.priority = new_priority
         new_priority += 1
@@ -130,8 +122,11 @@ def date_resort(job):
     mark = 0
     for i in all_jobs:
         added_job_date = i.due_date.strftime("%d%m%y")
-        if i.approved or added_job_date < job.due_date.strftime("%d%m%y"):
-            mark += 1
+        try:
+            if i.approved or added_job_date < job.due_date.strftime("%d%m%y"):
+                mark += 1
+        except(AttributeError):
+            pass
     job.priority = mark + 0.5
     refresh_priority()
 
@@ -165,16 +160,56 @@ def home():
         return redirect(url_for('login'))
 
 
-@app.route("/add/<referrer>", methods=["GET", "POST"])
+@app.route("/add_quote", methods=["GET", "POST"])
 @login_required
-def add(referrer):
-    # Currently manually adds jobs, later will import automatically from SQL
-    if auth(user=current_user.id, action="added", job="{new}") >= 3:
+def add_quote():
+    if auth(user=current_user.id, action="added", job="{new}") >= 4:
         if request.method == "GET":
-            return render_template("add.html", logged_in=current_user.is_authenticated)
+            return render_template("add_quote.html", logged_in=current_user.is_authenticated)
+        else:
+            job_name = request.form["job_name"]
+            due_date = request.form["due_date"]
+            due_date = datetime.strptime(due_date, "%Y-%m-%d")
+            notes = request.form["notes"]
+            add_quote = Jobs(job_no="NULL",
+                           job_name=job_name,
+                           due_date=due_date,
+                           status="todo",
+                           notes=notes,
+                           img_name="NULL",
+                           is_stamp=True)
+            db.session.add(add_quote)
+            db.session.commit()
+            return redirect(url_for('dashboard', logged_in=current_user.is_authenticated))
+    else:
+        flash("You are not authorized to perform this action.")
+        return redirect(url_for('dashboard', logged_in=current_user.is_authenticated))
+
+
+@app.route("/complete_quote/<job_id>", methods=["GET", "POST"])
+@login_required
+def complete_quote(job_id):
+    edit_job = Jobs.query.get(job_id)
+    if auth(user=current_user.id, action="confirmed", job=edit_job.job_no) >= 4:
+            edit_job.status = "submitted"
+            refresh_priority()
+    else:
+        flash("You are not authorized to perform this action.")
+    return redirect(request.referrer)
+
+
+@app.route("/add_job/<job_id>", methods=["GET", "POST"])
+@login_required
+def add_job(job_id):
+    new_job = Jobs.query.get(job_id)
+    if auth(user=current_user.id, action="added", job=job_id) >= 4:
+        if request.method == "GET":
+            return render_template("add_job.html",
+                job_name=new_job.job_name,
+                logged_in=current_user.is_authenticated)
         else:
             job_no = request.form["job_no"]
-            job_name = request.form["job_name"]
+            job_name = new_job.job_name
             due_date = (request.form["due_date"])
             due_date = datetime.strptime(due_date, "%Y-%m-%d")
             notes = request.form["notes"]
@@ -189,20 +224,17 @@ def add(referrer):
             except IndexError:
                 is_stamp = False
             status = f'Entered {current_date}'
-            add_job = Jobs(job_no=job_no,
-                           job_name=job_name,
+            new_job = Jobs(job_no=job_no,
                            due_date=due_date,
                            notes=notes,
+                           scheduled=1,
                            status=status,
                            img_name=f'job{job_no}',
                            is_stamp=is_stamp)
-            db.session.add(add_job)
+            print(new_job.scheduled)
             db.session.commit()
             date_resort(add_job)
-            if referrer == 'i':
-                return redirect(url_for('home', logged_in=current_user.is_authenticated))
-            else:
-                return redirect(url_for('dashboard', logged_in=current_user.is_authenticated))
+            return redirect(url_for('dashboard', logged_in=current_user.is_authenticated))
     else:
         flash("You are not authorized to perform this action.")
         return redirect(url_for('home', logged_in=current_user.is_authenticated))
@@ -499,10 +531,17 @@ def admin():
 @login_required
 def dashboard():
     # Displays all jobs and orders by priority
-    if auth(user=current_user.id, action="accessed dashboard", job='N/A') >= 5:
-        stamp_jobs = Jobs.query.order_by(Jobs.due_date).filter(Jobs.is_stamp == True)
+    if auth(user=current_user.id, action="accessed dashboard", job='N/A') >= 4:
+        stamp_jobs = Jobs.query.order_by(Jobs.due_date).filter(Jobs.is_stamp == True,
+                                                                Jobs.scheduled == 1)
+        outstanding_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.is_stamp == True,
+                                                                Jobs.status == "submitted")
+        to_do_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.is_stamp == True,
+                                                                Jobs.status == "todo")
         return render_template("dashboard.html",
                                all_jobs=stamp_jobs,
+                               outstanding_quotes=outstanding_quotes,
+                               to_do_quotes=to_do_quotes,
                                logged_in=current_user.is_authenticated)
     else:
         flash("You are not authorized to perform this action.")

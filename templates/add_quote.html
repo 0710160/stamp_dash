@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Press-Ready Jobs List{% endblock title %}
+{% block heading%}Press-Ready Jobs List{% endblock heading %}
+{% block home_active%}active{% endblock home_active %}
+{% block content %}
+
+<div class="container-fluid">
+    <div class="form-container">
+        <div class="custom-card custom-card-wide text-center animate-pop-in">
+            <div class="title">
+                <i class="fa fa-plus-square" aria-hidden="true"></i>
+                    <h2 class="heading">Add a quote to the list</h2>
+                <div class="form-action">
+                    <form action="" method="POST">
+                        <input type="text", name="job_name", placeholder="Quote name"><br>
+                        <label>Due date:</label>
+                        <input type="date", style="width:225px", name="due_date"><br>
+                        <textarea maxlength="249", name="notes", style="height:100px;" placeholder="Notes"></textarea>
+                        <br>
+                        <button class="btn btn-light buttons" type="submit">Add Quote</button><br>
+                        <a class="btn btn-light buttons" href="{{ url_for('home') }}">Return Home</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
