@@ -92,7 +92,6 @@ label {
   }
 
 .add-new {
-  height: 90px;
   width: 90px!important;
   font-size: 1rem!important;
   border-radius: 100px;
@@ -265,6 +264,10 @@ DASHBOARD
   padding-top: 2%;
 }
 
+.quote-card col {
+  vertical-align: middle;
+}
+
 .quote-card,.card h4 {
   color: var(--text-color);
 }
@@ -311,6 +314,9 @@ DASHBOARD
   border-radius: 10px 10px 0 0;
 }
 
+.won,.lost {
+  margin-bottom: 3px;
+}
 
 /*-----------------------------------------------------------------
 ANIMATIONS
