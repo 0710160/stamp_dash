@@ -101,11 +101,19 @@ label {
   bottom: 3%;
   padding: 10px;
   box-shadow: 4px 3px 8px 1px #969696;
+}
+
+.index-page .add-new {
   background: #C927D0;
   background: -webkit-linear-gradient(bottom right, #C927D0, #2ED5D6);
   background: -moz-linear-gradient(bottom right, #C927D0, #2ED5D6);
   background: linear-gradient(to top left, #C927D0, #2ED5D6);
   color: #fff;
+}
+
+.full-bg .add-new {
+  background: rgba(22, 82, 103, 100);
+  color: rgba(255, 201, 62, 100);
 }
 
 table .buttons {
@@ -237,7 +245,7 @@ DASHBOARD
   background-image: url(gradienta.webp);
   background-size: cover;
   background-repeat: repeat-y;
-  padding: 7% 5% 75px 5%;
+  padding: 7% 3%;
   z-index: -1;
 }
 
