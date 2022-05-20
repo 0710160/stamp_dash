@@ -250,7 +250,7 @@ DASHBOARD
 }
 
 .job-card {
-  width: 260px;
+  width: 300px;
 }
 
 .quote-card,.card {
@@ -277,7 +277,7 @@ DASHBOARD
   }
 
 .aspect-box {
-  aspect-ratio: 2.6;
+  aspect-ratio: 1.667;
 }
 
 .card .job_img {
@@ -286,13 +286,13 @@ DASHBOARD
   background-repeat: no-repeat;
   background-position: center;*/
   object-fit: cover;
-  height: max(100px, 100%);
-  width: max(260px, 100%);
+  height: max(180px, 100%);
+  width: max(300px, 100%);
   border-radius: 10px 10px 0 0;
 }
 
 .card .job_name {
-  height: 40px;
+  height: 50px;
 }
 
 .card hr {
@@ -310,7 +310,7 @@ DASHBOARD
 }
 
 .header_img {
-  height: 130px;
+  height: 180px;
   border-radius: 10px 10px 0 0;
 }
 
