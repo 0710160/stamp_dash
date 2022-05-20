@@ -39,7 +39,7 @@ def load_user(user_id):
 class Jobs(db.Model):
     ''' Creates a DB for the job information '''
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    job_no = db.Column(db.String, unique=True, nullable=False)
+    job_no = db.Column(db.String, nullable=False)
     job_name = db.Column(db.String(250), nullable=False)
     due_date = db.Column(db.Date)
     priority = db.Column(db.Float, default=9)
@@ -224,16 +224,15 @@ def add_job(job_id):
             except IndexError:
                 is_stamp = False
             status = f'Entered {current_date}'
-            new_job = Jobs(job_no=job_no,
-                           due_date=due_date,
-                           notes=notes,
-                           scheduled=1,
-                           status=status,
-                           img_name=f'job{job_no}',
-                           is_stamp=is_stamp)
-            print(new_job.scheduled)
+            new_job.job_no=job_no
+            new_job.due_date=due_date
+            new_job.notes=notes
+            new_job.scheduled=1
+            new_job.status=status
+            new_job.img_name=f'job{job_no}'
+            new_job.is_stamp=is_stamp
             db.session.commit()
-            date_resort(add_job)
+            date_resort(new_job)
             return redirect(url_for('dashboard', logged_in=current_user.is_authenticated))
     else:
         flash("You are not authorized to perform this action.")

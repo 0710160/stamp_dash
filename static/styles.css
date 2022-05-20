@@ -249,7 +249,7 @@ DASHBOARD
   z-index: -1;
 }
 
-.job_card {
+.job-card {
   width: 260px;
 }
 
@@ -261,7 +261,7 @@ DASHBOARD
 }
 
 .quote-card {
-  padding-top: 2%;
+  padding: 2% 0;
 }
 
 .quote-card col {
