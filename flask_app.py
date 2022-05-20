@@ -148,14 +148,19 @@ app.jinja_env.filters['datefilter'] = datefilter
 @app.route("/")
 @login_required
 def home():
-    # Displays all incomplete jobs and orders by priority if user is authorized
-    auth_user = User.query.get(current_user.id)
-    if auth_user.rights > 0:
-        all_jobs = Jobs.query.order_by(Jobs.priority).filter(Jobs.completed == False)
-        return render_template("index.html",
-                               all_jobs=all_jobs,
-                               logged_in=current_user.is_authenticated,
-                               user_rights=auth_user.rights)
+    # Displays all jobs and orders by priority
+    if auth(user=current_user.id, action="accessed dashboard", job='N/A') >= 1:
+        stamp_jobs = Jobs.query.order_by(Jobs.due_date).filter(Jobs.is_stamp == True,
+                                                                Jobs.scheduled == 1)
+        outstanding_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.is_stamp == True,
+                                                                Jobs.status == "submitted")
+        to_do_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.is_stamp == True,
+                                                                Jobs.status == "todo")
+        return render_template("dashboard.html",
+                               all_jobs=stamp_jobs,
+                               outstanding_quotes=outstanding_quotes,
+                               to_do_quotes=to_do_quotes,
+                               logged_in=current_user.is_authenticated)
     else:
         return redirect(url_for('login'))
 
@@ -180,10 +185,10 @@ def add_quote():
                            is_stamp=True)
             db.session.add(add_quote)
             db.session.commit()
-            return redirect(url_for('dashboard', logged_in=current_user.is_authenticated))
+            return redirect(url_for('home', logged_in=current_user.is_authenticated))
     else:
         flash("You are not authorized to perform this action.")
-        return redirect(url_for('dashboard', logged_in=current_user.is_authenticated))
+        return redirect(url_for('home', logged_in=current_user.is_authenticated))
 
 
 @app.route("/complete_quote/<job_id>", methods=["GET", "POST"])
@@ -233,7 +238,7 @@ def add_job(job_id):
             new_job.is_stamp=is_stamp
             db.session.commit()
             date_resort(new_job)
-            return redirect(url_for('dashboard', logged_in=current_user.is_authenticated))
+            return redirect(url_for('home', logged_in=current_user.is_authenticated))
     else:
         flash("You are not authorized to perform this action.")
         return redirect(url_for('home', logged_in=current_user.is_authenticated))
@@ -521,27 +526,6 @@ def admin():
                 user.password = password
             db.session.commit()
             return redirect(url_for('home', logged_in=current_user.is_authenticated))
-    else:
-        flash("You are not authorized to perform this action.")
-        return redirect(url_for('home', logged_in=current_user.is_authenticated))
-
-
-@app.route("/dashboard")
-@login_required
-def dashboard():
-    # Displays all jobs and orders by priority
-    if auth(user=current_user.id, action="accessed dashboard", job='N/A') >= 4:
-        stamp_jobs = Jobs.query.order_by(Jobs.due_date).filter(Jobs.is_stamp == True,
-                                                                Jobs.scheduled == 1)
-        outstanding_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.is_stamp == True,
-                                                                Jobs.status == "submitted")
-        to_do_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.is_stamp == True,
-                                                                Jobs.status == "todo")
-        return render_template("dashboard.html",
-                               all_jobs=stamp_jobs,
-                               outstanding_quotes=outstanding_quotes,
-                               to_do_quotes=to_do_quotes,
-                               logged_in=current_user.is_authenticated)
     else:
         flash("You are not authorized to perform this action.")
         return redirect(url_for('home', logged_in=current_user.is_authenticated))

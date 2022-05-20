@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Stamp Job Dashboard{% endblock title %}
 {% block heading %}Stamp Job Dashboard{% endblock heading %}
-{% block dash_active%}active{% endblock dash_active %}
+{% block home_active%}active{% endblock home_active %}
 {% block hide_footer %}hidden{% endblock hide_footer %}
 {% block content %}
 
@@ -39,16 +39,24 @@
     {% endfor %}
   </div>
 
-  <div class="quote-card row">
+  <div class="quote-card row mobile-hidden">
     <div class="container-flex quote-big-box col">
-      <h3>Quotes To-Do List</h3>
+      <div class="row">
+        <div class="col">
+          <h3>Quotes To-Do List</h3>
+        </div>
+        <div class="col-3">
+          <a class="btn btn-light add-quote" href="/add_quote">Add new quote</a>
+        </div>
+      </div>
+      <hr />
       {% for t in to_do_quotes %}
       <div class="row justify-content-between">
         <div class="col">
           <a href="/edit/{{ t.id }}">{{ t.job_name }}</a>
           <h4>Due date: {{ t.due_date | datefilter }}</h4>
         </div>
-        <div class="col-4">
+        <div class="col-3">
           <a class="btn btn-primary won" href="/complete_quote/{{ t.id }}">Done</a>
           <a class="btn btn-warning lost" href="/delete/{{ t.id }}">Delete</a>
         </div>
@@ -58,12 +66,13 @@
 
     <div class="container-flex quote-big-box col">
       <h3>Outstanding Quotes</h3>
+      <hr />
       {% for q in outstanding_quotes %}
       <div class="row justify-content-between">
         <div class="col">
           <a href="/edit/{{ q.id }}">{{ q.job_name }}</a>
         </div>
-        <div class="col-4">
+        <div class="col-3">
           <a class="btn btn-primary won" href="/add_job/{{ q.id }}">Won</a>
           <a class="btn btn-warning lost" href="/delete/{{ q.id }}">Lost</a>
         </div>
@@ -71,8 +80,6 @@
       {% endfor %}
     </div>
   </div>
-
-  <a class="btn buttons add-new" href="/add_quote">Add new quote</a>
 
 </div>
 

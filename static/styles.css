@@ -91,17 +91,6 @@ label {
   display: inline-block;
   }
 
-.add-new {
-  width: 90px!important;
-  font-size: 1rem!important;
-  border-radius: 100px;
-  position: fixed;
-  right: 1.5%;
-  bottom: 3%;
-  padding: 10px;
-  box-shadow: 4px 3px 8px 1px #969696;
-}
-
 .index-page .add-new {
   background: #C927D0;
   background: -webkit-linear-gradient(bottom right, #C927D0, #2ED5D6);
@@ -318,6 +307,11 @@ DASHBOARD
   margin-bottom: 3px;
 }
 
+.add-quote {
+  position: relative;
+  bottom: 5%;
+}
+
 /*-----------------------------------------------------------------
 ANIMATIONS
 -----------------------------------------------------------------*/
@@ -362,5 +356,9 @@ MEDIA QUERIES
 @media only screen and (max-width: 600px) {
   .full-bg {
     background-size: contain;
+  }
+
+  .mobile-hidden {
+    display: none;
   }
 }
