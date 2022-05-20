@@ -109,7 +109,7 @@ table .buttons {
   }
 
 .flashes {
-  color: #384B52;
+  color: rgba(255, 201, 62, 100);
   }
 
 
@@ -212,6 +212,10 @@ ul li {
     font-size: 16px;
 }
 
+.admin-page li {
+  color: #000;
+}
+
 .form-action buttons {
   width: 200px;
   }
@@ -304,12 +308,7 @@ DASHBOARD
 }
 
 .won,.lost {
-  margin-bottom: 3px;
-}
-
-.add-quote {
-  position: relative;
-  bottom: 5%;
+  margin: 0 3px 3px 3px;
 }
 
 /*-----------------------------------------------------------------

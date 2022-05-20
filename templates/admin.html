@@ -14,34 +14,28 @@
         <label style="color:black;">User name:</label>
         <input type="text" , style="width:100px;" , name="name"><br>
         <label style="color:black;">Access rights:</label>
-<<<<<<< HEAD
         <input type="text" , style="width:50px;" , name="rights"><br>
         <label style="color:black;">New password:</label>
         <input type="password" , style="width:100px;" , name="password"><br>
-=======
-        <input type="text", style="width:50px;", name="rights">
-        <label style="color:black;">New password:</label>
-        <input type="password", style="width:100px;", name="password">
->>>>>>> main
         <br>
         <button class="btn btn-dark buttons" type="submit">Edit User</button>
         <a class="btn btn-secondary buttons" href="{{ url_for('home') }}">Return Home</a>
       </form>
       <hr>
     </div>
-    <div class="col-lg-4 col-sm-12">
+    <div class="col-lg-4 col-sm-12 admin-page">
       <h2>User Rights Levels:</h2>
       <ul>
         <li>5 = Admin (all rights)</li>
-        <li>4 = Sort</li>
-        <li>3 = Approve, Edit, Add New Job</li>
-        <li>2 = Plates</li>
-        <li>1 = Complete</li>
-        <li>0 = Read Only</li>
+        <li>4 = Add, Edit</li>
+        <li>3 = Unused</li>
+        <li>2 = Unused</li>
+        <li>1 = Read Only</li>
+        <li>0 = Account Only</li>
       </ul>
     </div>
     <hr>
-    <div class="col-lg-4 col-sm-12">
+    <div class="col-lg-4 col-sm-12 admin-page">
       <h2>Current User List:</h2>
       <ul>
         {% for user in users: %}

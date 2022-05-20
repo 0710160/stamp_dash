@@ -87,11 +87,11 @@ def auth(user, action, job):
     '''
     Function to check if user is authorized to perform an action.
         5 = Admin (all rights)
-        4 = Sort
-        3 = Approve, Edit, Add New Job
-        2 = Plates
-        1 = Complete
-        0 = No access
+        4 = Add, Edit
+        3 = Unused
+        2 = Unused
+        1 = Read Only
+        0 = Account Only
     Logs actions to log.db
     '''
     auth_user = User.query.get(user)
@@ -162,7 +162,8 @@ def home():
                                to_do_quotes=to_do_quotes,
                                logged_in=current_user.is_authenticated)
     else:
-        return redirect(url_for('login'))
+        flash(f"Please register a user to view this content.\nIf you've already signed up, please wait for the administrator to approve your user.")
+        return redirect(url_for('new_user'))
 
 
 @app.route("/add_quote", methods=["GET", "POST"])
@@ -248,7 +249,7 @@ def add_job(job_id):
 @login_required
 def edit(job_id):
     edit_job = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="edited", job=edit_job.job_no) >= 3:
+    if auth(user=current_user.id, action="edited", job=edit_job.job_no) >= 4:
         if request.method == "GET":
             filename = Path(os.path.join(app.config['UPLOAD_FOLDER'], edit_job.img_name))
             if filename.is_file():
@@ -354,7 +355,7 @@ def complete(job_id):
     # Removes a job from the list
     complete_job = Jobs.query.get(job_id)
     job_name = complete_job.job_name
-    if auth(user=current_user.id, action="completed", job=complete_job.job_no) >= 1:
+    if auth(user=current_user.id, action="completed", job=complete_job.job_no) >= 4:
         if complete_job.is_stamp:
             complete_job.completed = True
             current_date = datetime.now().strftime('%d/%m/%Y')
