@@ -67,73 +67,74 @@
           </div>
         </div>
       </div>
-    {% endfor %}
-  </div>
-
-  <div class="container-flex quote-big-box col">
-    <div class="row">
-      <div class="col">
-        <h3>Outstanding Quotes</h3>
-      </div>
-      <div class="col-4">
-        <input type="text" placeholder="Filter quotes" id="myInput" onkeyup="myFunction()">
-      </div>
+      {% endfor %}
     </div>
-    <hr />
-    <div class="justify-content-between">
-      <div>
-        <ul id="myUL">
-          {% for q in outstanding_quotes %}
-          <li><a href="/edit/{{ q.id }}" data-keywords="{{ q.job_name }}">{{ q.job_name }}</a>
-            <div class="row">
-              <div class="col-3">
-                <a class="btn btn-primary won" href="/add_job/{{ q.id }}">Won</a>
-                <a class="btn btn-warning lost" href="/delete/{{ q.id }}">Lost</a>
+
+    <div class="container-flex quote-big-box col">
+      <div class="row">
+        <div class="col">
+          <h3>Outstanding Quotes</h3>
+        </div>
+        <div class="col-4">
+          <input type="text" placeholder="Filter quotes" id="myInput" onkeyup="myFunction()">
+        </div>
+      </div>
+      <hr />
+      <div class="justify-content-between">
+        <div>
+          <ul id="myUL">
+            {% for q in outstanding_quotes %}
+            <li>
+                <a href="/edit/{{ q.id }}" data-keywords="{{ q.job_name }}">{{ q.job_name }} | {{q.due_date | datefilter }}</a>
+              <div class="row">
+                <div class="col-3">
+                  <a class="btn btn-primary won" href="/add_job/{{ q.id }}">Won</a>
+                  <a class="btn btn-warning lost" href="/delete/{{ q.id }}">Lost</a>
+                </div>
               </div>
-            </div>
-          </li>
-          {% endfor %}
-        </ul>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
       </div>
+
     </div>
 
-  </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script>
+      // Search functionality
+      function myFunction() {
+        // Declare variables
+        var input = document.getElementById('myInput'),
+          filter = input.value,
+          ul = document.getElementById('myUL'),
+          lis = ul.getElementsByTagName('li'),
+          searchTerms = filter.match(/[a-z]+/gi),
+          re, index, li, a;
 
-  <script>
-    // Search functionality
-    function myFunction() {
-      // Declare variables
-      var input = document.getElementById('myInput'),
-        filter = input.value,
-        ul = document.getElementById('myUL'),
-        lis = ul.getElementsByTagName('li'),
-        searchTerms = filter.match(/[a-z]+/gi),
-        re, index, li, a;
+        if (searchTerms) {
+          searchTerms = searchTerms.map(function(term) {
+            return '(?=.*' + term + ')';
+          });
 
-      if (searchTerms) {
-        searchTerms = searchTerms.map(function(term) {
-          return '(?=.*' + term + ')';
-        });
-
-        re = new RegExp(searchTerms.join(''), 'i');
-      } else {
-        re = /./;
-      }
-
-      // Loop through all list items, and hide those who don't match the search query
-      for (index = 0; index < lis.length; index++) {
-        li = lis[index];
-        a = li.firstChild;
-
-        if (re.test(a.innerHTML + ' ' + a.getAttribute('data-keywords'))) {
-          li.style.display = '';
+          re = new RegExp(searchTerms.join(''), 'i');
         } else {
-          li.style.display = 'none';
+          re = /./;
+        }
+
+        // Loop through all list items, and hide those who don't match the search query
+        for (index = 0; index < lis.length; index++) {
+          li = lis[index];
+          a = li.firstChild;
+
+          if (re.test(a.innerHTML + ' ' + a.getAttribute('data-keywords'))) {
+            li.style.display = '';
+          } else {
+            li.style.display = 'none';
+          }
         }
       }
-    }
-  </script>
+    </script>
 
-  {% endblock %}
+    {% endblock %}

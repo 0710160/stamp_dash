@@ -198,6 +198,7 @@ def complete_quote(job_id):
     edit_job = Jobs.query.get(job_id)
     if auth(user=current_user.id, action="confirmed", job=edit_job.job_no) >= 4:
             edit_job.status = "submitted"
+            edit_job.due_date = datetime.now().strftime('%d/%m/%Y')
             refresh_priority()
     else:
         flash("You are not authorized to perform this action.")
