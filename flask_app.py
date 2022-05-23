@@ -87,8 +87,8 @@ def auth(user, action, job):
     '''
     Function to check if user is authorized to perform an action.
         5 = Admin (all rights)
-        4 = Add, Edit
-        3 = Unused
+        4 = Add, Edit Quotes
+        3 = Add, Edit Jobs
         2 = Unused
         1 = Read Only
         0 = Account Only
@@ -102,33 +102,6 @@ def auth(user, action, job):
         db.session.add(log_action)
         db.session.commit()
     return auth_user.rights
-
-
-def plates_resort(job):
-    '''Re-sorts job order based on new confirmed+plated job'''
-    all_jobs = Jobs.query.order_by(Jobs.priority).filter(Jobs.completed == False)
-    mark = 0
-    for i in all_jobs:
-        if i.approved and i.plates_made and not i.job_no == job.job_no:
-            mark += 1
-            print(i.job_no, mark)
-    job.priority = mark + 0.5
-    refresh_priority()
-
-
-def date_resort(job):
-    '''Re-sorts job order based on new job's due date'''
-    all_jobs = Jobs.query.order_by(Jobs.priority).filter(Jobs.completed == False)
-    mark = 0
-    for i in all_jobs:
-        added_job_date = i.due_date.strftime("%d%m%y")
-        try:
-            if i.approved or added_job_date < job.due_date.strftime("%d%m%y"):
-                mark += 1
-        except(AttributeError):
-            pass
-    job.priority = mark + 0.5
-    refresh_priority()
 
 
 def allowed_file(filename):
@@ -209,7 +182,7 @@ def complete_quote(job_id):
 @login_required
 def add_job(job_id):
     new_job = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="added", job=job_id) >= 4:
+    if auth(user=current_user.id, action="added", job=job_id) >= 3:
         if request.method == "GET":
             return render_template("add_job.html",
                 job_name=new_job.job_name,
@@ -239,7 +212,7 @@ def add_job(job_id):
             new_job.img_name=f'job{job_no}'
             new_job.is_stamp=is_stamp
             db.session.commit()
-            date_resort(new_job)
+            refresh_priority(new_job)
             return redirect(url_for('home', logged_in=current_user.is_authenticated))
     else:
         flash("You are not authorized to perform this action.")
@@ -250,7 +223,7 @@ def add_job(job_id):
 @login_required
 def edit(job_id):
     edit_job = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="edited", job=edit_job.job_no) >= 4:
+    if auth(user=current_user.id, action="edited", job=edit_job.job_no) >= 3:
         if request.method == "GET":
             filename = Path(os.path.join(app.config['UPLOAD_FOLDER'], edit_job.img_name))
             if filename.is_file():
@@ -321,7 +294,7 @@ def edit(job_id):
 @login_required
 def upload_img(job_id):
     job = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="completed", job=job.job_no) >= 4:
+    if auth(user=current_user.id, action="completed", job=job.job_no) >= 3:
         if request.method == 'GET':
             return render_template('upload_img.html',
                                    job=job,
@@ -356,7 +329,7 @@ def complete(job_id):
     # Removes a job from the list
     complete_job = Jobs.query.get(job_id)
     job_name = complete_job.job_name
-    if auth(user=current_user.id, action="completed", job=complete_job.job_no) >= 4:
+    if auth(user=current_user.id, action="completed", job=complete_job.job_no) >= 3:
         if complete_job.is_stamp:
             complete_job.completed = True
             current_date = datetime.now().strftime('%d/%m/%Y')
@@ -383,72 +356,6 @@ def delete(job_id):
     else:
         flash("You are not authorized to perform this action.")
     return redirect(url_for('home', logged_in=current_user.is_authenticated))
-
-
-@app.route("/priority_up/<job_id>")
-@login_required
-def priority_up(job_id):
-    # Increases priority
-    priority_edit = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="increased priority on", job=priority_edit.job_no) >= 4:
-        priority_edit.priority -= 1.5
-        refresh_priority()
-    else:
-        flash("You are not authorized to perform this action.")
-    return redirect(request.referrer)
-
-
-@app.route("/priority_down/<job_id>")
-@login_required
-def priority_down(job_id):
-    # Decreases priority
-    priority_edit = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="decreased priority on", job=priority_edit.job_no) >= 4:
-        priority_edit.priority += 1.5
-        refresh_priority()
-    else:
-        flash("You are not authorized to perform this action.")
-    return redirect(request.referrer)
-
-
-@app.route("/plates/<job_id>")
-@login_required
-def plates(job_id):
-    # Toggles True/False
-    job = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="plates made for", job=job.job_no) >= 2:
-        if job.plates_made:
-            job.plates_made = False
-            db.session.commit()
-        else:
-            job.plates_made = True
-            current_date = datetime.now().strftime('%d/%m/%Y')
-            job.status = f'Plates made {current_date}'
-            # Runs through list to re-prioritise below other confirmed/plated jobs
-            plates_resort(job)
-    else:
-        flash("You are not authorized to perform this action.")
-    return redirect(request.referrer)
-
-
-@app.route("/approved/<job_id>")
-@login_required
-def approved(job_id):
-    # Toggles True/False
-    job = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="approved", job=job.job_no) >= 3:
-        if job.approved:
-            job.approved = False
-            db.session.commit()
-        else:
-            job.approved = True
-            current_date = datetime.now().strftime('%d/%m/%Y')
-            job.status = f'Proof approved {current_date}'
-            # Runs through list to re-prioritise below other confirmed/plated jobs
-            plates_resort(job)
-    else:
-        flash("You are not authorized to perform this action.")
-    return redirect(request.referrer)
 
 
 @app.route('/new_user', methods=["GET", "POST"])
@@ -544,11 +451,11 @@ def status(job_id):
     elif job_edit.status.startswith("On proof"):
         job_edit.status = f"Proof approved {current_date}"
         job_edit.approved = True
-        plates_resort(job_edit)
+        refresh_priority(job_edit)
     elif job_edit.status.startswith("Proof approved"):
         job_edit.status = f"Plates made {current_date}"
         job_edit.plates_made = True
-        plates_resort(job_edit)
+        refresh_priority(job_edit)
     elif job_edit.status.startswith("Plates made"):
         job_edit.status = f"Printed {current_date}"
         job_edit.completed = True

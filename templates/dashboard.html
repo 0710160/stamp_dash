@@ -20,7 +20,7 @@
         </a>
       </div>
       <div class="details">
-        <a href="/edit/{{ i.id }}" target="_blank">
+        <a href="/edit/{{ i.id }}"><!--target="_blank"-->
           <div class="job_name">
             <h3>{{ i.job_no }} - {{ i.job_name }}</h3>
           </div>
@@ -73,7 +73,7 @@
       <table id="myTable" class="table">
         <tr class="header">
           <th scope="col">Outstanding Quotes</th>
-          <th scope="col">Completed Date</th>
+          <th scope="col">Completed</th>
           <th scope="col"><input type="text" placeholder="Filter quotes" id="myInput" onkeyup="myFunction()"></th>
         </tr>
         {% for q in outstanding_quotes %}
