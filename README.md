@@ -10,4 +10,4 @@
 Based on SCP Production Scheduler repo with expanded quote management and focus on stamps at the expense of general inter-department production management.
 
 ## Wishlist
-Get Won-Lost buttons in the quotes area to appear in-line while the Filter Quotes JS input still filters.
+"Jump to Quotes" button at top

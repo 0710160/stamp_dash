@@ -185,7 +185,6 @@ def add_job(job_id):
     if auth(user=current_user.id, action="added", job=job_id) >= 3:
         if request.method == "GET":
             return render_template("add_job.html",
-                job_name=new_job.job_name,
                 logged_in=current_user.is_authenticated)
         else:
             job_no = request.form["job_no"]
@@ -212,7 +211,7 @@ def add_job(job_id):
             new_job.img_name=f'job{job_no}'
             new_job.is_stamp=is_stamp
             db.session.commit()
-            refresh_priority(new_job)
+            refresh_priority()
             return redirect(url_for('home', logged_in=current_user.is_authenticated))
     else:
         flash("You are not authorized to perform this action.")
@@ -315,7 +314,7 @@ def upload_img(job_id):
                 db.session.commit()
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                 # print('upload_image filename: ' + new_filename)
-                return redirect(url_for('dashboard',
+                return redirect(url_for('home',
                                         job_id=job_id,
                                         logged_in=current_user.is_authenticated))
     else:
@@ -451,11 +450,11 @@ def status(job_id):
     elif job_edit.status.startswith("On proof"):
         job_edit.status = f"Proof approved {current_date}"
         job_edit.approved = True
-        refresh_priority(job_edit)
+        refresh_priority()
     elif job_edit.status.startswith("Proof approved"):
         job_edit.status = f"Plates made {current_date}"
         job_edit.plates_made = True
-        refresh_priority(job_edit)
+        refresh_priority()
     elif job_edit.status.startswith("Plates made"):
         job_edit.status = f"Printed {current_date}"
         job_edit.completed = True
