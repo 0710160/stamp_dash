@@ -58,7 +58,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250))
     password = db.Column(db.String(100))
-    rights = db.Column(db.Integer, default=0)  # 0 is read-only, 5 is admin
+    rights = db.Column(db.Integer, default=0)  # 0 is no access, 1 is read-only, 5 is admin
 
 
 class Log(db.Model):
@@ -87,11 +87,11 @@ def auth(user, action, job):
     '''
     Function to check if user is authorized to perform an action.
         5 = Admin (all rights)
-        4 = Add, Edit Quotes
-        3 = Add, Edit Jobs
+        4 = Edit Quotes & Jobs
+        3 = Add Quotes & Jobs
         2 = Unused
         1 = Read Only
-        0 = Account Only
+        0 = No Access
     Logs actions to log.db
     '''
     auth_user = User.query.get(user)
@@ -146,7 +146,7 @@ def home():
 @app.route("/add_quote", methods=["GET", "POST"])
 @login_required
 def add_quote():
-    if auth(user=current_user.id, action="added", job="{new}") >= 4:
+    if auth(user=current_user.id, action="added", job="{new}") >= 3:
         if request.method == "GET":
             return render_template("add_quote.html", logged_in=current_user.is_authenticated)
         else:
@@ -172,7 +172,7 @@ def add_quote():
 @login_required
 def complete_quote(job_id):
     edit_job = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="confirmed", job=edit_job.job_no) >= 4:
+    if auth(user=current_user.id, action="confirmed", job=edit_job.job_no) >= 3:
             edit_job.status = "submitted"
             edit_job.due_date = time_adjusted()
             refresh_priority()
@@ -219,7 +219,7 @@ def add_job(job_id):
 @login_required
 def edit(job_id):
     edit_job = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="edited", job=edit_job.job_no) >= 3:
+    if auth(user=current_user.id, action="edited", job=edit_job.job_no) >= 4:
         if request.method == "GET":
             filename = Path(os.path.join(app.config['UPLOAD_FOLDER'], edit_job.img_name))
             if filename.is_file():
@@ -336,29 +336,12 @@ def image(job_id):
                             logged_in=current_user.is_authenticated)
 
 
-@app.route("/complete/<job_id>")
-@login_required
-def complete(job_id):
-    # Removes a job from the list
-    complete_job = Jobs.query.get(job_id)
-    job_name = complete_job.job_name
-    if auth(user=current_user.id, action="completed", job=complete_job.job_no) >= 3:
-        complete_job.completed = True
-        current_date = time_adjusted()
-        complete_job.status = f'Printed {current_date}'
-        db.session.commit()
-        TelegramBot.send_text(f"Job {job_name} completed.")
-    else:
-        flash("You are not authorized to perform this action.")
-    return redirect(request.referrer)
-
-
 @app.route("/delete/<job_id>")
 @login_required
 def delete(job_id):
     # Removes a job from the database
     delete_job = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="deleted", job=delete_job.job_no) >= 3:
+    if auth(user=current_user.id, action="deleted", job=delete_job.job_no) >= 4:
         try:
             os.remove(os.path.join(app.config['UPLOAD_FOLDER'], delete_job.img_name))
         except(FileNotFoundError):
