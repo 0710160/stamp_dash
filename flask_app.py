@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import desc
-from datetime import datetime
+from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.exceptions import HTTPException
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
@@ -98,10 +98,17 @@ def auth(user, action, job):
     if action.startswith("accessed") and auth_user.name == "mattt":
         pass
     else:
-        log_action = Log(timestamp=datetime.now(), action=f"User {auth_user.name} {action} job {job}")
+        accessed_time = time_adjusted()
+        log_action = Log(timestamp=accessed_time, action=f"User {auth_user.name} {action} job {job}")
         db.session.add(log_action)
         db.session.commit()
     return auth_user.rights
+
+
+def time_adjusted():
+    # Adds 10 hours to PythonAnywhere system time to adjust for timezone
+    nz_time = datetime.now() + timedelta(hours=10)
+    return nz_time
 
 
 def allowed_file(filename):
@@ -167,7 +174,7 @@ def complete_quote(job_id):
     edit_job = Jobs.query.get(job_id)
     if auth(user=current_user.id, action="confirmed", job=edit_job.job_no) >= 4:
             edit_job.status = "submitted"
-            edit_job.due_date = datetime.now()
+            edit_job.due_date = time_adjusted()
             refresh_priority()
     else:
         flash("You are not authorized to perform this action.")
@@ -192,7 +199,7 @@ def add_job(job_id):
             filename = f'job{job_no}'
             blank_img = open(os.path.join(app.config['UPLOAD_FOLDER'], filename), "w")
             blank_img.close()
-            current_date = datetime.now()
+            current_date = time_adjusted()
             status = f'Entered {current_date}'
             new_job.job_no=job_no
             new_job.due_date=due_date
@@ -224,7 +231,7 @@ def edit(job_id):
                                    job=edit_job,
                                    logged_in=current_user.is_authenticated)
         else:
-            current_date = datetime.now().strftime('%d/%m/%Y')
+            current_date = time_adjusted()
             if request.form["new_due_date"] == "":
                 pass
             else:
@@ -255,9 +262,6 @@ def edit(job_id):
             elif request.form['status'] == "approved":
                 edit_job.status = f'Proof approved {current_date}'
                 edit_job.approved = True
-            elif request.form['status'] == "plates":
-                edit_job.status = f'Plates made {current_date}'
-                edit_job.plates_made = True
             elif request.form['status'] == "printed":
                 edit_job.status = f'Printed {current_date}'
                 edit_job.completed = True
@@ -340,7 +344,7 @@ def complete(job_id):
     job_name = complete_job.job_name
     if auth(user=current_user.id, action="completed", job=complete_job.job_no) >= 3:
         complete_job.completed = True
-        current_date = datetime.now().strftime('%d/%m/%Y')
+        current_date = time_adjusted()
         complete_job.status = f'Printed {current_date}'
         db.session.commit()
         TelegramBot.send_text(f"Job {job_name} completed.")
@@ -453,7 +457,7 @@ def admin():
 def status(job_id):
     # Cycles through job status
     job_edit = Jobs.query.get(job_id)
-    current_date = datetime.now().strftime('%d/%m/%Y')
+    current_date = time_adjusted()
     if job_edit.status.startswith("Entered"):
         job_edit.status = f"On proof {current_date}"
     elif job_edit.status.startswith("On proof"):
@@ -461,12 +465,9 @@ def status(job_id):
         job_edit.approved = True
         refresh_priority()
     elif job_edit.status.startswith("Proof approved"):
-        job_edit.status = f"Plates made {current_date}"
-        job_edit.plates_made = True
-        refresh_priority()
-    elif job_edit.status.startswith("Plates made"):
         job_edit.status = f"Printed {current_date}"
         job_edit.completed = True
+        refresh_priority()
     elif job_edit.status.startswith("Printed"):
         job_edit.status = f"Check & pack {current_date}"
     elif job_edit.status.startswith("Check"):
