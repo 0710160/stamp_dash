@@ -1,6 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Press-Ready Jobs List{% endblock title %}
-{% block heading%}Press-Ready Jobs List{% endblock heading %}
+{% block heading%}Add Job to Schedule{% endblock heading %}
 {% block home_active%}active{% endblock home_active %}
 {% block content %}
 
@@ -16,8 +15,6 @@
                         <input type="text", name="job_name", placeholder="{{ job_name }}"><br>
                         <label>Due date:</label>
                         <input type="date", style="width:225px", name="due_date"><br>
-                        <label>Stamp job?</label>
-                        <input type="checkbox", name="is_stamp", style="width:20px"><br>
                         <textarea maxlength="249", name="notes", style="height:100px;" placeholder="Notes"></textarea>
                         <br>
                         <button class="btn btn-light buttons" type="submit">Add Job</button><br>

@@ -68,7 +68,7 @@ class Log(db.Model):
     action = db.Column(db.String(100))
 
 
-db.create_all()
+#db.create_all()
 
 
 def refresh_priority():
@@ -95,7 +95,7 @@ def auth(user, action, job):
     Logs actions to log.db
     '''
     auth_user = User.query.get(user)
-    if action.startswith("accessed"):
+    if action.startswith("accessed") and auth_user.name == "mattt":
         pass
     else:
         log_action = Log(timestamp=datetime.now(), action=f"User {auth_user.name} {action} job {job}")
@@ -123,12 +123,9 @@ app.jinja_env.filters['datefilter'] = datefilter
 def home():
     # Displays all jobs and orders by priority
     if auth(user=current_user.id, action="accessed dashboard", job='N/A') >= 1:
-        stamp_jobs = Jobs.query.order_by(Jobs.due_date).filter(Jobs.is_stamp == True,
-                                                                Jobs.scheduled == 1)
-        outstanding_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.is_stamp == True,
-                                                                Jobs.status == "submitted")
-        to_do_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.is_stamp == True,
-                                                                Jobs.status == "todo")
+        stamp_jobs = Jobs.query.order_by(Jobs.due_date).filter(Jobs.scheduled == 1)
+        outstanding_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.status == "submitted")
+        to_do_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.status == "todo")
         return render_template("dashboard.html",
                                all_jobs=stamp_jobs,
                                outstanding_quotes=outstanding_quotes,
@@ -155,8 +152,7 @@ def add_quote():
                            due_date=due_date,
                            status="todo",
                            notes=notes,
-                           img_name="NULL",
-                           is_stamp=True)
+                           img_name="NULL")
             db.session.add(add_quote)
             db.session.commit()
             return redirect(url_for('home', logged_in=current_user.is_authenticated))
@@ -171,7 +167,7 @@ def complete_quote(job_id):
     edit_job = Jobs.query.get(job_id)
     if auth(user=current_user.id, action="confirmed", job=edit_job.job_no) >= 4:
             edit_job.status = "submitted"
-            edit_job.due_date = datetime.now().strftime('%d/%m/%Y')
+            edit_job.due_date = datetime.now()
             refresh_priority()
     else:
         flash("You are not authorized to perform this action.")
@@ -185,6 +181,7 @@ def add_job(job_id):
     if auth(user=current_user.id, action="added", job=job_id) >= 3:
         if request.method == "GET":
             return render_template("add_job.html",
+                job_name=new_job.job_name,
                 logged_in=current_user.is_authenticated)
         else:
             job_no = request.form["job_no"]
@@ -195,13 +192,7 @@ def add_job(job_id):
             filename = f'job{job_no}'
             blank_img = open(os.path.join(app.config['UPLOAD_FOLDER'], filename), "w")
             blank_img.close()
-            current_date = datetime.now().strftime('%d/%m/%Y')
-            is_stamp = False
-            try:
-                if request.form.getlist('is_stamp')[0]:
-                    is_stamp = True
-            except IndexError:
-                is_stamp = False
+            current_date = datetime.now()
             status = f'Entered {current_date}'
             new_job.job_no=job_no
             new_job.due_date=due_date
@@ -209,7 +200,6 @@ def add_job(job_id):
             new_job.scheduled=1
             new_job.status=status
             new_job.img_name=f'job{job_no}'
-            new_job.is_stamp=is_stamp
             db.session.commit()
             refresh_priority()
             return redirect(url_for('home', logged_in=current_user.is_authenticated))
@@ -241,11 +231,6 @@ def edit(job_id):
                 new_due_date = request.form["new_due_date"]
                 new_due_date = datetime.strptime(new_due_date, "%Y-%m-%d")
                 edit_job.due_date = new_due_date
-            try:
-                if request.form.getlist('is_stamp')[0]:
-                    edit_job.is_stamp = True
-            except IndexError:
-                edit_job.is_stamp = False
             if request.form["new_priority"] == "":
                 pass
             else:
@@ -289,6 +274,22 @@ def edit(job_id):
         return redirect(url_for('home', logged_in=current_user.is_authenticated))
 
 
+@app.route("/image_handler/<job_id>")
+@login_required
+def image_handler(job_id):
+    job = Jobs.query.get(job_id)
+    filename = os.path.join(app.config['UPLOAD_FOLDER'], job.img_name)
+    filesize = os.path.getsize(filename)
+    if filesize < 100:
+        return redirect(url_for('upload_img',
+                                job_id=job_id,
+                                logged_in=current_user.is_authenticated))
+    else:
+        return redirect(url_for('image',
+                                job_id=job.id,
+                                logged_in=current_user.is_authenticated))
+
+
 @app.route("/upload_img/<job_id>", methods=["GET", "POST"])
 @login_required
 def upload_img(job_id):
@@ -322,6 +323,15 @@ def upload_img(job_id):
         return redirect(url_for('home', logged_in=current_user.is_authenticated))
 
 
+@app.route("/image/<job_id>")
+@login_required
+def image(job_id):
+    job = Jobs.query.get(job_id)
+    return render_template('image.html',
+                            job=job,
+                            logged_in=current_user.is_authenticated)
+
+
 @app.route("/complete/<job_id>")
 @login_required
 def complete(job_id):
@@ -329,13 +339,9 @@ def complete(job_id):
     complete_job = Jobs.query.get(job_id)
     job_name = complete_job.job_name
     if auth(user=current_user.id, action="completed", job=complete_job.job_no) >= 3:
-        if complete_job.is_stamp:
-            complete_job.completed = True
-            current_date = datetime.now().strftime('%d/%m/%Y')
-            complete_job.status = f'Printed {current_date}'
-        else:
-            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], complete_job.img_name))
-            db.session.delete(complete_job)
+        complete_job.completed = True
+        current_date = datetime.now().strftime('%d/%m/%Y')
+        complete_job.status = f'Printed {current_date}'
         db.session.commit()
         TelegramBot.send_text(f"Job {job_name} completed.")
     else:
@@ -349,7 +355,10 @@ def delete(job_id):
     # Removes a job from the database
     delete_job = Jobs.query.get(job_id)
     if auth(user=current_user.id, action="deleted", job=delete_job.job_no) >= 3:
-        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], delete_job.img_name))
+        try:
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], delete_job.img_name))
+        except(FileNotFoundError):
+            pass
         db.session.delete(delete_job)
         db.session.commit()
     else:

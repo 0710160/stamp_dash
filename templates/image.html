@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block heading%}Image for {{ job.job_name }}{% endblock heading %}
+{% block content %}
+
+<div class="container-fluid">
+<img src="/static/uploads/{{ job.img_name }}" class="big_img">
+</div>
+
+{% endblock %}

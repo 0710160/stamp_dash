@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% block title %}Stamp Job Dashboard{% endblock title %}
 {% block heading %}Stamp Job Dashboard{% endblock heading %}
 {% block home_active%}active{% endblock home_active %}
 {% block hide_footer %}hidden{% endblock hide_footer %}
@@ -11,12 +10,8 @@
     {% for i in all_jobs %}
     <div class="card job-card">
       <div class="title header_img aspect-box">
-        <a href="/upload_img/{{ i.id }}">
-          {% if i.img_name %}
+        <a href="/image_handler/{{ i.id }}">
           <img src="/static/uploads/{{ i.img_name }}" class="job_img">
-          {% else %}
-          <i class="fa fa-edit img_placeholder" aria-hidden="true"></i>
-          {% endif %}
         </a>
       </div>
       <div class="details">
@@ -47,8 +42,8 @@
           <th scope="col">Due Date</th>
           <th scope="col"><a class="btn btn-light add-quote" href="/add_quote">Add new quote</a></th>
         </tr>
-        <tr>
           {% for t in to_do_quotes %}
+        <tr>
           <td>
             <a href="/edit/{{ t.id }}">{{ t.job_name }}</a>
           </td>
@@ -64,8 +59,8 @@
                 <a class="btn btn-warning lost" href="/delete/{{ t.id }}">Delete</a>
               </div>
           </td>
-          {% endfor %}
         </tr>
+          {% endfor %}
       </table>
     </div>
 
