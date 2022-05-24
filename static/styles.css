@@ -252,6 +252,10 @@ DASHBOARD
   border: none;
 }
 
+.approved {
+  background-color: rgba(245, 255, 235, 0.8);
+}
+
 .quote-card {
   padding: 2% 0;
 }

@@ -8,7 +8,10 @@
 <div class="container-fluid full-bg">
   <div class="d-flex flex-wrap">
     {% for i in all_jobs %}
-    <div class="card job-card">
+    <div class="card job-card
+    {% if i.status.startswith('Proof') %} approved
+    {% elif i.status.startswith('Dispatched') %} dispatched
+    {% endif %}">
       <div class="title header_img aspect-box">
         <a href="/image_handler/{{ i.id }}">
           <img src="/static/uploads/{{ i.img_name }}" class="job_img">
