@@ -91,14 +91,14 @@ def auth(user, action, job):
         3 = Add Quotes & Jobs
         2 = Unused
         1 = Read Only
-        0 = No Access
+        0 = No Access, Admin Confirmation Required
     Logs actions to log.db
     '''
     auth_user = User.query.get(user)
     if action.startswith("accessed") and auth_user.name == "mattt":
         pass
     else:
-        accessed_time = time_adjusted()
+        accessed_time = datetime.now() + timedelta(hours=10)
         log_action = Log(timestamp=accessed_time, action=f"User {auth_user.name} {action} job {job}")
         db.session.add(log_action)
         db.session.commit()
@@ -108,7 +108,7 @@ def auth(user, action, job):
 def time_adjusted():
     # Adds 10 hours to PythonAnywhere system time to adjust for timezone
     nz_time = datetime.now() + timedelta(hours=10)
-    return nz_time
+    return nz_time.strftime('%d/%m/%Y')
 
 
 def allowed_file(filename):
