@@ -446,12 +446,12 @@ def status(job_id):
     elif job_edit.status.startswith("On proof"):
         job_edit.status = f"Proof approved {current_date}"
         job_edit.approved = True
-        refresh_priority()
     elif job_edit.status.startswith("Proof approved"):
         job_edit.status = f"Printed {current_date}"
         job_edit.completed = True
-        refresh_priority()
     elif job_edit.status.startswith("Printed"):
+        job_edit.status = f"Finishing {current_date}"
+    elif job_edit.status.startswith("Finishing"):
         job_edit.status = f"Check & pack {current_date}"
     elif job_edit.status.startswith("Check"):
         job_edit.status = f"Dispatched {current_date}"
@@ -460,6 +460,7 @@ def status(job_id):
         os.remove(os.path.join(app.config['UPLOAD_FOLDER'], job_edit.img_name))
     else:
         job_edit.status = job_edit.status
+    refresh_priority()
     db.session.commit()
     return redirect(request.referrer)
 
