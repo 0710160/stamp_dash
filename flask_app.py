@@ -174,7 +174,7 @@ def complete_quote(job_id):
     edit_job = Jobs.query.get(job_id)
     if auth(user=current_user.id, action="confirmed", job=edit_job.job_no) >= 3:
             edit_job.status = "submitted"
-            edit_job.due_date = time_adjusted()
+            edit_job.due_date = datetime.now() + timedelta(hours=10)
             refresh_priority()
     else:
         flash("You are not authorized to perform this action.")
@@ -277,6 +277,40 @@ def edit(job_id):
         flash("You are not authorized to perform this action.")
         return redirect(url_for('home', logged_in=current_user.is_authenticated))
 
+
+@app.route("/status/<job_id>")
+@login_required
+def status(job_id):
+    job_edit = Jobs.query.get(job_id)
+    # Cycles through job status
+    if auth(user=current_user.id, action="updated", job=job_edit.job_no) >= 4:
+        current_date = time_adjusted()
+        if job_edit.status.startswith("Entered"):
+            job_edit.status = f"On proof {current_date}"
+        elif job_edit.status.startswith("On proof"):
+            job_edit.status = f"Proof approved {current_date}"
+            job_edit.approved = True
+        elif job_edit.status.startswith("Proof approved"):
+            job_edit.status = f"Printed {current_date}"
+            job_edit.completed = True
+        elif job_edit.status.startswith("Printed"):
+            job_edit.status = f"Finishing {current_date}"
+        elif job_edit.status.startswith("Finishing"):
+            job_edit.status = f"Check & pack {current_date}"
+        elif job_edit.status.startswith("Check"):
+            job_edit.status = f"Dispatched {current_date}"
+        elif job_edit.status.startswith("Dispatched "):
+            db.session.delete(job_edit)
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], job_edit.img_name))
+        else:
+            job_edit.status = job_edit.status
+        refresh_priority()
+        db.session.commit()
+        return redirect(request.referrer)
+    else:
+        flash("You are not authorized to perform this action.")
+        return redirect(url_for('home', logged_in=current_user.is_authenticated))
+        
 
 @app.route("/image_handler/<job_id>")
 @login_required
@@ -433,35 +467,6 @@ def admin():
     else:
         flash("You are not authorized to perform this action.")
         return redirect(url_for('home', logged_in=current_user.is_authenticated))
-
-
-@app.route("/status/<job_id>")
-@login_required
-def status(job_id):
-    # Cycles through job status
-    job_edit = Jobs.query.get(job_id)
-    current_date = time_adjusted()
-    if job_edit.status.startswith("Entered"):
-        job_edit.status = f"On proof {current_date}"
-    elif job_edit.status.startswith("On proof"):
-        job_edit.status = f"Proof approved {current_date}"
-        job_edit.approved = True
-        refresh_priority()
-    elif job_edit.status.startswith("Proof approved"):
-        job_edit.status = f"Printed {current_date}"
-        job_edit.completed = True
-        refresh_priority()
-    elif job_edit.status.startswith("Printed"):
-        job_edit.status = f"Check & pack {current_date}"
-    elif job_edit.status.startswith("Check"):
-        job_edit.status = f"Dispatched {current_date}"
-    elif job_edit.status.startswith("Dispatched "):
-        db.session.delete(job_edit)
-        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], job_edit.img_name))
-    else:
-        job_edit.status = job_edit.status
-    db.session.commit()
-    return redirect(request.referrer)
 
 
 @app.errorhandler(401)
