@@ -25,7 +25,11 @@
         </a>
         <hr>
         <h4>Due date: {{ i.due_date | datefilter }}</h4>
+        {% if i.status.startswith('Dispatched') %}
+        <a href="/status/{{ i.id }}" onclick="return confirm('Are you sure you want to remove this delivered job?')">
+          {% else %}
         <a href="/status/{{ i.id }}">
+          {% endif %}
           {{ i.status }}
         </a>
         <br><br>
