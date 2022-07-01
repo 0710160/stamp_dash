@@ -13,8 +13,8 @@ import os
 load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-UPLOAD_FOLDER = 'static/uploads/'
-# UPLOAD_FOLDER = '/home/0710160/mysite/static/uploads'
+# UPLOAD_FOLDER = 'static/uploads/'
+UPLOAD_FOLDER = '/home/0710160/mysite/static/uploads'
 ALLOWED_EXTENSIONS = set(['webp', 'png', 'jpg', 'jpeg'])
 
 app = Flask(__name__)
@@ -83,7 +83,7 @@ def refresh_priority():
     db.session.commit()
 
 
-def auth(user, action, job):
+def auth(user, action, job, name):
     '''
     Function to check if user is authorized to perform an action.
         5 = Admin (all rights)
@@ -99,7 +99,7 @@ def auth(user, action, job):
         pass
     else:
         accessed_time = datetime.now() + timedelta(hours=10)
-        log_action = Log(timestamp=accessed_time, action=f"User {auth_user.name} {action} job {job}")
+        log_action = Log(timestamp=accessed_time, action=f"User {auth_user.name} {action} job {job} {name}")
         db.session.add(log_action)
         db.session.commit()
     return auth_user.rights
@@ -129,7 +129,7 @@ app.jinja_env.filters['datefilter'] = datefilter
 @login_required
 def home():
     # Displays all jobs and orders by priority
-    if auth(user=current_user.id, action="accessed dashboard", job='N/A') >= 1:
+    if auth(user=current_user.id, action="accessed dashboard", job='N/A', name='') >= 1:
         stamp_jobs = Jobs.query.order_by(Jobs.due_date).filter(Jobs.scheduled == 1)
         outstanding_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.status == "submitted")
         to_do_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.status == "todo")
@@ -146,7 +146,7 @@ def home():
 @app.route("/add_quote", methods=["GET", "POST"])
 @login_required
 def add_quote():
-    if auth(user=current_user.id, action="added", job="{new}") >= 3:
+    if auth(user=current_user.id, action="added", job="{new}", name='') >= 3:
         if request.method == "GET":
             return render_template("add_quote.html", logged_in=current_user.is_authenticated)
         else:
@@ -172,7 +172,7 @@ def add_quote():
 @login_required
 def complete_quote(job_id):
     edit_job = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="confirmed", job=edit_job.job_no) >= 3:
+    if auth(user=current_user.id, action="confirmed", job=edit_job.job_no, name=edit_job.job_name) >= 3:
             edit_job.status = "submitted"
             edit_job.due_date = datetime.now() + timedelta(hours=10)
             refresh_priority()
@@ -185,7 +185,7 @@ def complete_quote(job_id):
 @login_required
 def add_job(job_id):
     new_job = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="added", job=job_id) >= 3:
+    if auth(user=current_user.id, action="added", job=job_id, name=new_job.job_name) >= 3:
         if request.method == "GET":
             return render_template("add_job.html",
                 job_name=new_job.job_name,
@@ -219,7 +219,7 @@ def add_job(job_id):
 @login_required
 def edit(job_id):
     edit_job = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="edited", job=edit_job.job_no) >= 4:
+    if auth(user=current_user.id, action="edited", job=edit_job.job_no, name=edit_job.job_name) >= 4:
         if request.method == "GET":
             filename = Path(os.path.join(app.config['UPLOAD_FOLDER'], edit_job.img_name))
             if filename.is_file():
@@ -264,7 +264,6 @@ def edit(job_id):
                 edit_job.approved = True
             elif request.form['status'] == "printed":
                 edit_job.status = f'Printed {current_date}'
-                edit_job.completed = True
             elif request.form['status'] == "finishing":
                 edit_job.status = f'Finishing {current_date}'
             elif request.form['status'] == "check_pack":
@@ -283,7 +282,7 @@ def edit(job_id):
 def status(job_id):
     job_edit = Jobs.query.get(job_id)
     # Cycles through job status
-    if auth(user=current_user.id, action="updated", job=job_edit.job_no) >= 4:
+    if auth(user=current_user.id, action="updated", job=job_edit.job_no, name=job_edit.job_name) >= 4:
         current_date = time_adjusted()
         if job_edit.status.startswith("Entered"):
             job_edit.status = f"On proof {current_date}"
@@ -292,7 +291,6 @@ def status(job_id):
             job_edit.approved = True
         elif job_edit.status.startswith("Proof approved"):
             job_edit.status = f"Printed {current_date}"
-            job_edit.completed = True
         elif job_edit.status.startswith("Printed"):
             job_edit.status = f"Finishing {current_date}"
         elif job_edit.status.startswith("Finishing"):
@@ -300,8 +298,12 @@ def status(job_id):
         elif job_edit.status.startswith("Check"):
             job_edit.status = f"Dispatched {current_date}"
         elif job_edit.status.startswith("Dispatched "):
-            db.session.delete(job_edit)
-            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], job_edit.img_name))
+            job_edit.status = f"Delivered {current_date}"
+            job_edit.completed = True
+            try:
+                os.remove(os.path.join(app.config['UPLOAD_FOLDER'], job_edit.img_name))
+            except(FileNotFoundError):
+                pass
         else:
             job_edit.status = job_edit.status
         refresh_priority()
@@ -310,7 +312,7 @@ def status(job_id):
     else:
         flash("You are not authorized to perform this action.")
         return redirect(url_for('home', logged_in=current_user.is_authenticated))
-        
+
 
 @app.route("/image_handler/<job_id>")
 @login_required
@@ -332,7 +334,7 @@ def image_handler(job_id):
 @login_required
 def upload_img(job_id):
     job = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="completed", job=job.job_no) >= 3:
+    if auth(user=current_user.id, action="edited", job=job.job_no, name=job.job_name) >= 3:
         if request.method == 'GET':
             return render_template('upload_img.html',
                                    job=job,
@@ -375,7 +377,7 @@ def image(job_id):
 def delete(job_id):
     # Removes a job from the database
     delete_job = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="deleted", job=delete_job.job_no) >= 4:
+    if auth(user=current_user.id, action="deleted", job=delete_job.job_no, name=delete_job.job_name) >= 4:
         try:
             os.remove(os.path.join(app.config['UPLOAD_FOLDER'], delete_job.img_name))
         except(FileNotFoundError):
@@ -439,7 +441,7 @@ def logout():
 @app.route("/admin", methods=["GET", "POST"])
 @login_required
 def admin():
-    if auth(user=current_user.id, action="accessed admin page", job='N/A') >= 5:
+    if auth(user=current_user.id, action="accessed admin page", job='N/A', name='') >= 5:
         if request.method == "GET":
             all_logs = Log.query.order_by(desc(Log.timestamp)).all()
             all_users = User.query.all()
