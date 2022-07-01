@@ -224,7 +224,7 @@ def add_job(job_id):
 @login_required
 def edit(job_id):
     edit_job = Jobs.query.get(job_id)
-    if auth_user_min >= 4:
+    if auth_user_min(user=current_user.id) >= 4:
         if request.method == "GET":
             filename = Path(os.path.join(app.config['UPLOAD_FOLDER'], edit_job.img_name))
             if filename.is_file():
@@ -297,7 +297,7 @@ def edit(job_id):
 def status(job_id):
     job_edit = Jobs.query.get(job_id)
     # Cycles through job status
-    if auth_user_min >= 4:
+    if auth_user_min(user=current_user.id) >= 4:
         current_date = time_adjusted()
         if job_edit.status.startswith("Entered"):
             job_edit.status = f"On proof {current_date}"
