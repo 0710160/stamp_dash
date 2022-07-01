@@ -105,6 +105,11 @@ def auth(user, action, job, name):
     return auth_user.rights
 
 
+def auth_user_min(user):
+    auth_user = User.query.get(user)
+    return auth_user.rights
+
+
 def time_adjusted():
     # Adds 10 hours to PythonAnywhere system time to adjust for timezone
     nz_time = datetime.now() + timedelta(hours=10)
@@ -130,7 +135,7 @@ app.jinja_env.filters['datefilter'] = datefilter
 def home():
     # Displays all jobs and orders by priority
     if auth(user=current_user.id, action="accessed dashboard", job='N/A', name='') >= 1:
-        stamp_jobs = Jobs.query.order_by(Jobs.due_date).filter(Jobs.scheduled == 1)
+        stamp_jobs = Jobs.query.order_by(Jobs.due_date).filter(Jobs.scheduled == 1, Jobs.completed == False))
         outstanding_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.status == "submitted")
         to_do_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.status == "todo")
         return render_template("dashboard.html",
@@ -219,7 +224,7 @@ def add_job(job_id):
 @login_required
 def edit(job_id):
     edit_job = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="edited", job=edit_job.job_no, name=edit_job.job_name) >= 4:
+    if auth_user_min >= 4:
         if request.method == "GET":
             filename = Path(os.path.join(app.config['UPLOAD_FOLDER'], edit_job.img_name))
             if filename.is_file():
@@ -235,12 +240,14 @@ def edit(job_id):
             if request.form["new_due_date"] == "":
                 pass
             else:
+                auth(user=current_user.id, action="edited due date", job=edit_job.job_no, name=edit_job.job_name)
                 new_due_date = request.form["new_due_date"]
                 new_due_date = datetime.strptime(new_due_date, "%Y-%m-%d")
                 edit_job.due_date = new_due_date
             if request.form["new_priority"] == "":
                 pass
             else:
+                auth(user=current_user.id, action="edited priority", job=edit_job.job_no, name=edit_job.job_name)
                 new_priority = request.form["new_priority"]
                 edit_job.priority = new_priority
             if request.form["notes"] == "":
@@ -248,27 +255,35 @@ def edit(job_id):
             elif request.form["notes"] == " ":
                 edit_job.notes = None
             else:
+                auth(user=current_user.id, action="edited notes", job=edit_job.job_no, name=edit_job.job_name)
                 notes = request.form["notes"]
                 edit_job.notes = notes
             if request.form["new_name"] == "":
                 pass
             else:
                 job_name = request.form["new_name"]
+                auth(user=current_user.id, action="edited job name", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.job_name = job_name
             if request.form['status'] == "curr":
                 pass
             elif request.form['status'] == "proof":
+                auth(user=current_user.id, action="marked on proof", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.status = f'On proof {current_date}'
             elif request.form['status'] == "approved":
+                auth(user=current_user.id, action="marked proof approved", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.status = f'Proof approved {current_date}'
                 edit_job.approved = True
             elif request.form['status'] == "printed":
+                auth(user=current_user.id, action="marked printed", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.status = f'Printed {current_date}'
             elif request.form['status'] == "finishing":
+                auth(user=current_user.id, action="marked finishing", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.status = f'Finishing {current_date}'
             elif request.form['status'] == "check_pack":
+                auth(user=current_user.id, action="marked check & pack", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.status = f'Checking & packing {current_date}'
             elif request.form['status'] == "dispatched":
+                auth(user=current_user.id, action="marked dispatched", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.status = f'Dispatched {current_date}'
             refresh_priority()
             return redirect(url_for('home', logged_in=current_user.is_authenticated))
@@ -282,22 +297,29 @@ def edit(job_id):
 def status(job_id):
     job_edit = Jobs.query.get(job_id)
     # Cycles through job status
-    if auth(user=current_user.id, action="updated", job=job_edit.job_no, name=job_edit.job_name) >= 4:
+    if auth_user_min >= 4:
         current_date = time_adjusted()
         if job_edit.status.startswith("Entered"):
             job_edit.status = f"On proof {current_date}"
+            auth(user=current_user.id, action="marked on proof", job=job_edit.job_no, name=job_edit.job_name)
         elif job_edit.status.startswith("On proof"):
             job_edit.status = f"Proof approved {current_date}"
+            auth(user=current_user.id, action="marked proof approved", job=job_edit.job_no, name=job_edit.job_name)
             job_edit.approved = True
         elif job_edit.status.startswith("Proof approved"):
+            auth(user=current_user.id, action="marked printed", job=job_edit.job_no, name=job_edit.job_name)
             job_edit.status = f"Printed {current_date}"
         elif job_edit.status.startswith("Printed"):
+            auth(user=current_user.id, action="marked finishing", job=job_edit.job_no, name=job_edit.job_name)
             job_edit.status = f"Finishing {current_date}"
         elif job_edit.status.startswith("Finishing"):
+            auth(user=current_user.id, action="marked check & pack", job=job_edit.job_no, name=job_edit.job_name)
             job_edit.status = f"Check & pack {current_date}"
         elif job_edit.status.startswith("Check"):
+            auth(user=current_user.id, action="marked dispatched", job=job_edit.job_no, name=job_edit.job_name)
             job_edit.status = f"Dispatched {current_date}"
         elif job_edit.status.startswith("Dispatched "):
+            auth(user=current_user.id, action="marked delivered", job=job_edit.job_no, name=job_edit.job_name)
             job_edit.status = f"Delivered {current_date}"
             job_edit.completed = True
             try:
