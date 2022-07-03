@@ -46,7 +46,7 @@
   </div>
 
   <h2>User Action Log:</h2>
-  <div style="height:300px;width:700px;overflow:auto;">
+  <div style="height:300px;width:75vw;overflow:auto;">
     {% for log in all_logs %}
     <ul>{{ log.timestamp}} - {{ log.action }}</ul>
     {% endfor %}
