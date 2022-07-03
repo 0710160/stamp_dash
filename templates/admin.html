@@ -26,8 +26,8 @@
       <h2>User Rights Levels:</h2>
       <ul>
         <li>5 = Admin (all rights)</li>
-        <li>4 = Add, Edit</li>
-        <li>3 = Unused</li>
+        <li>4 = Edit quotes & jobs</li>
+        <li>3 = Add quotes & jobs</li>
         <li>2 = Unused</li>
         <li>1 = Read Only</li>
         <li>0 = Account Only</li>
@@ -46,7 +46,7 @@
   </div>
 
   <h2>User Action Log:</h2>
-  <div style="height:300px;width:700px;overflow:auto;">
+  <div style="height:300px;width:75vw;overflow:auto;">
     {% for log in all_logs %}
     <ul>{{ log.timestamp}} - {{ log.action }}</ul>
     {% endfor %}
