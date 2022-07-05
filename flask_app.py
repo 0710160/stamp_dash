@@ -99,7 +99,7 @@ def auth(user, action, job, name):
         pass
     else:
         accessed_time = datetime.now() + timedelta(hours=10)
-        log_action = Log(timestamp=accessed_time, action=f"User {auth_user.name} {action} job {job} {name}")
+        log_action = Log(timestamp=accessed_time, action=f"User {auth_user.name} {action} {job} {name}")
         db.session.add(log_action)
         db.session.commit()
     return auth_user.rights
@@ -135,7 +135,7 @@ app.jinja_env.filters['datefilter'] = datefilter
 def home():
     # Displays all jobs and orders by priority
     if auth(user=current_user.id, action="accessed dashboard", job='N/A', name='') >= 1:
-        stamp_jobs = Jobs.query.order_by(Jobs.due_date).filter(Jobs.scheduled == 1, Jobs.completed == False))
+        stamp_jobs = Jobs.query.order_by(Jobs.due_date).filter(Jobs.scheduled == 1, Jobs.completed == False)
         outstanding_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.status == "submitted")
         to_do_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.status == "todo")
         return render_template("dashboard.html",
@@ -151,7 +151,7 @@ def home():
 @app.route("/add_quote", methods=["GET", "POST"])
 @login_required
 def add_quote():
-    if auth(user=current_user.id, action="added", job="{new}", name='') >= 3:
+    if auth(user=current_user.id, action="added quote", job="{new}", name='') >= 3:
         if request.method == "GET":
             return render_template("add_quote.html", logged_in=current_user.is_authenticated)
         else:
@@ -177,7 +177,7 @@ def add_quote():
 @login_required
 def complete_quote(job_id):
     edit_job = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="confirmed", job=edit_job.job_no, name=edit_job.job_name) >= 3:
+    if auth(user=current_user.id, action="confirmed quote", job=edit_job.job_no, name=edit_job.job_name) >= 3:
             edit_job.status = "submitted"
             edit_job.due_date = datetime.now() + timedelta(hours=10)
             refresh_priority()
@@ -190,7 +190,7 @@ def complete_quote(job_id):
 @login_required
 def add_job(job_id):
     new_job = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="added", job=job_id, name=new_job.job_name) >= 3:
+    if auth(user=current_user.id, action="added job", job=job_id, name=new_job.job_name) >= 3:
         if request.method == "GET":
             return render_template("add_job.html",
                 job_name=new_job.job_name,
@@ -240,14 +240,14 @@ def edit(job_id):
             if request.form["new_due_date"] == "":
                 pass
             else:
-                auth(user=current_user.id, action="edited due date", job=edit_job.job_no, name=edit_job.job_name)
+                auth(user=current_user.id, action="edited due date on job", job=edit_job.job_no, name=edit_job.job_name)
                 new_due_date = request.form["new_due_date"]
                 new_due_date = datetime.strptime(new_due_date, "%Y-%m-%d")
                 edit_job.due_date = new_due_date
             if request.form["new_priority"] == "":
                 pass
             else:
-                auth(user=current_user.id, action="edited priority", job=edit_job.job_no, name=edit_job.job_name)
+                auth(user=current_user.id, action="edited priority on job", job=edit_job.job_no, name=edit_job.job_name)
                 new_priority = request.form["new_priority"]
                 edit_job.priority = new_priority
             if request.form["notes"] == "":
@@ -255,35 +255,35 @@ def edit(job_id):
             elif request.form["notes"] == " ":
                 edit_job.notes = None
             else:
-                auth(user=current_user.id, action="edited notes", job=edit_job.job_no, name=edit_job.job_name)
+                auth(user=current_user.id, action="edited notes on job", job=edit_job.job_no, name=edit_job.job_name)
                 notes = request.form["notes"]
                 edit_job.notes = notes
             if request.form["new_name"] == "":
                 pass
             else:
                 job_name = request.form["new_name"]
-                auth(user=current_user.id, action="edited job name", job=edit_job.job_no, name=edit_job.job_name)
+                auth(user=current_user.id, action="edited job name on job", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.job_name = job_name
             if request.form['status'] == "curr":
                 pass
             elif request.form['status'] == "proof":
-                auth(user=current_user.id, action="marked on proof", job=edit_job.job_no, name=edit_job.job_name)
+                auth(user=current_user.id, action="marked on proof job", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.status = f'On proof {current_date}'
             elif request.form['status'] == "approved":
-                auth(user=current_user.id, action="marked proof approved", job=edit_job.job_no, name=edit_job.job_name)
+                auth(user=current_user.id, action="marked proof approved on job", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.status = f'Proof approved {current_date}'
                 edit_job.approved = True
             elif request.form['status'] == "printed":
-                auth(user=current_user.id, action="marked printed", job=edit_job.job_no, name=edit_job.job_name)
+                auth(user=current_user.id, action="marked printed job", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.status = f'Printed {current_date}'
             elif request.form['status'] == "finishing":
-                auth(user=current_user.id, action="marked finishing", job=edit_job.job_no, name=edit_job.job_name)
+                auth(user=current_user.id, action="marked finishing job", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.status = f'Finishing {current_date}'
             elif request.form['status'] == "check_pack":
-                auth(user=current_user.id, action="marked check & pack", job=edit_job.job_no, name=edit_job.job_name)
+                auth(user=current_user.id, action="marked check & pack job", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.status = f'Checking & packing {current_date}'
             elif request.form['status'] == "dispatched":
-                auth(user=current_user.id, action="marked dispatched", job=edit_job.job_no, name=edit_job.job_name)
+                auth(user=current_user.id, action="marked dispatched job", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.status = f'Dispatched {current_date}'
             refresh_priority()
             return redirect(url_for('home', logged_in=current_user.is_authenticated))
@@ -301,25 +301,25 @@ def status(job_id):
         current_date = time_adjusted()
         if job_edit.status.startswith("Entered"):
             job_edit.status = f"On proof {current_date}"
-            auth(user=current_user.id, action="marked on proof", job=job_edit.job_no, name=job_edit.job_name)
+            auth(user=current_user.id, action="marked on proof job", job=job_edit.job_no, name=job_edit.job_name)
         elif job_edit.status.startswith("On proof"):
             job_edit.status = f"Proof approved {current_date}"
-            auth(user=current_user.id, action="marked proof approved", job=job_edit.job_no, name=job_edit.job_name)
+            auth(user=current_user.id, action="marked proof approved on job", job=job_edit.job_no, name=job_edit.job_name)
             job_edit.approved = True
         elif job_edit.status.startswith("Proof approved"):
-            auth(user=current_user.id, action="marked printed", job=job_edit.job_no, name=job_edit.job_name)
+            auth(user=current_user.id, action="marked printed job", job=job_edit.job_no, name=job_edit.job_name)
             job_edit.status = f"Printed {current_date}"
         elif job_edit.status.startswith("Printed"):
-            auth(user=current_user.id, action="marked finishing", job=job_edit.job_no, name=job_edit.job_name)
+            auth(user=current_user.id, action="marked finishing job", job=job_edit.job_no, name=job_edit.job_name)
             job_edit.status = f"Finishing {current_date}"
         elif job_edit.status.startswith("Finishing"):
-            auth(user=current_user.id, action="marked check & pack", job=job_edit.job_no, name=job_edit.job_name)
+            auth(user=current_user.id, action="marked check & pack job", job=job_edit.job_no, name=job_edit.job_name)
             job_edit.status = f"Check & pack {current_date}"
         elif job_edit.status.startswith("Check"):
-            auth(user=current_user.id, action="marked dispatched", job=job_edit.job_no, name=job_edit.job_name)
+            auth(user=current_user.id, action="marked dispatched job", job=job_edit.job_no, name=job_edit.job_name)
             job_edit.status = f"Dispatched {current_date}"
         elif job_edit.status.startswith("Dispatched "):
-            auth(user=current_user.id, action="marked delivered", job=job_edit.job_no, name=job_edit.job_name)
+            auth(user=current_user.id, action="marked delivered job", job=job_edit.job_no, name=job_edit.job_name)
             job_edit.status = f"Delivered {current_date}"
             job_edit.completed = True
             try:
@@ -356,7 +356,7 @@ def image_handler(job_id):
 @login_required
 def upload_img(job_id):
     job = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="edited", job=job.job_no, name=job.job_name) >= 3:
+    if auth(user=current_user.id, action="added image to job", job=job.job_no, name=job.job_name) >= 3:
         if request.method == 'GET':
             return render_template('upload_img.html',
                                    job=job,
@@ -399,7 +399,7 @@ def image(job_id):
 def delete(job_id):
     # Removes a job from the database
     delete_job = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="deleted", job=delete_job.job_no, name=delete_job.job_name) >= 4:
+    if auth(user=current_user.id, action="deleted quote/job", job=delete_job.job_no, name=delete_job.job_name) >= 4:
         try:
             os.remove(os.path.join(app.config['UPLOAD_FOLDER'], delete_job.img_name))
         except(FileNotFoundError):
