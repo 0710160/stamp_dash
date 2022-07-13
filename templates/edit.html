@@ -32,7 +32,6 @@
                                 <option value="check_pack">Check & pack</option>
                                 <option value="dispatched">Dispatched</option>
                             </select><br>
-                            <input type="number", name="new_priority", placeholder="Priority {{ job.priority }}"><br>
                                 {% if job.notes %}
                             <textarea maxlength="249", style="height:100px;", name="notes", placeholder="{{ job.notes }}"></textarea>
                                 {% else %}
