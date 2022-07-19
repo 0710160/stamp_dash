@@ -8,13 +8,14 @@ from flask_login import UserMixin, login_user, LoginManager, login_required, cur
 from telegram_bot import TelegramBot
 from dotenv import load_dotenv
 from pathlib import Path
+from flask_mail import Mail, Message
 import os
 
 load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-# UPLOAD_FOLDER = 'static/uploads/'
-UPLOAD_FOLDER = '/home/0710160/mysite/static/uploads'
+UPLOAD_FOLDER = 'static/uploads/'
+# UPLOAD_FOLDER = '/home/0710160/mysite/static/uploads'
 ALLOWED_EXTENSIONS = set(['webp', 'png', 'jpg', 'jpeg'])
 
 app = Flask(__name__)
@@ -29,6 +30,16 @@ db = SQLAlchemy(app)
 # Flask login manager
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+
+# Flask Mail manager
+app.config['MAIL_SERVER'] = 'smtp.google.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = '0710160@gmail.com'
+app.config['MAIL_PASSWORD'] = 'LH11@goo'
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_USE_TLS'] = False
+mail = Mail(app)
 
 
 @login_manager.user_loader
@@ -103,6 +114,13 @@ def auth(user, action, job, name):
         db.session.add(log_action)
         db.session.commit()
     return auth_user.rights
+
+
+def mail_manager(recipients, body):
+    msg = Message('Notification from Stamp Production Manager', sender='0710160@gmail.com', recipients=recipients)
+    msg.body=body
+    mail.send(msg)
+    return "Sent"
 
 
 def auth_user_min(user):
@@ -244,12 +262,6 @@ def edit(job_id):
                 new_due_date = request.form["new_due_date"]
                 new_due_date = datetime.strptime(new_due_date, "%Y-%m-%d")
                 edit_job.due_date = new_due_date
-            if request.form["new_priority"] == "":
-                pass
-            else:
-                auth(user=current_user.id, action="edited priority on job", job=edit_job.job_no, name=edit_job.job_name)
-                new_priority = request.form["new_priority"]
-                edit_job.priority = new_priority
             if request.form["notes"] == "":
                 pass
             elif request.form["notes"] == " ":
@@ -271,6 +283,7 @@ def edit(job_id):
                 edit_job.status = f'On proof {current_date}'
             elif request.form['status'] == "approved":
                 auth(user=current_user.id, action="marked proof approved on job", job=edit_job.job_no, name=edit_job.job_name)
+                #mail_manager(['xlvi@mm.st'], f'This is an automated notification from Stamp Production Manager. Job {edit_job.job_name} is approved to print.')
                 edit_job.status = f'Proof approved {current_date}'
                 edit_job.approved = True
             elif request.form['status'] == "printed":
@@ -303,8 +316,9 @@ def status(job_id):
             job_edit.status = f"On proof {current_date}"
             auth(user=current_user.id, action="marked on proof job", job=job_edit.job_no, name=job_edit.job_name)
         elif job_edit.status.startswith("On proof"):
-            job_edit.status = f"Proof approved {current_date}"
             auth(user=current_user.id, action="marked proof approved on job", job=job_edit.job_no, name=job_edit.job_name)
+            #mail_manager(['xlvi@mm.st'], f'This is an automated notification from Stamp Production Manager. Job {job_edit.job_name} is approved to print.')
+            job_edit.status = f"Proof approved {current_date}"
             job_edit.approved = True
         elif job_edit.status.startswith("Proof approved"):
             auth(user=current_user.id, action="marked printed job", job=job_edit.job_no, name=job_edit.job_name)
