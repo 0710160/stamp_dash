@@ -14,8 +14,8 @@ import os
 load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-UPLOAD_FOLDER = 'static/uploads/'
-# UPLOAD_FOLDER = '/home/0710160/mysite/static/uploads'
+# UPLOAD_FOLDER = 'static/uploads/'
+UPLOAD_FOLDER = '/home/0710160/mysite/static/uploads'
 ALLOWED_EXTENSIONS = set(['webp', 'png', 'jpg', 'jpeg'])
 
 app = Flask(__name__)
@@ -33,10 +33,10 @@ login_manager.init_app(app)
 
 
 # Flask Mail manager
-app.config['MAIL_SERVER'] = 'smtp.google.com'
+app.config['MAIL_SERVER'] = 'smtp.fastmail.com'
 app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = '0710160@gmail.com'
-app.config['MAIL_PASSWORD'] = 'LH11@goo'
+app.config['MAIL_USERNAME'] = 'mtobin@fastmail.fm'
+app.config['MAIL_PASSWORD'] = 'n4gnhagqml9pyawp'
 app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_USE_TLS'] = False
 mail = Mail(app)
@@ -82,18 +82,6 @@ class Log(db.Model):
 #db.create_all()
 
 
-def refresh_priority():
-    ''' Function to count all jobs in DB and re-arrange based on priority where 1 is highest '''
-    all_jobs = Jobs.query.order_by(Jobs.priority).filter(Jobs.completed == False)
-    new_priority = 1
-    all_jobs = Jobs.query.order_by(Jobs.priority).all()
-    new_priority = 0
-    for job in all_jobs:
-        job.priority = new_priority
-        new_priority += 1
-    db.session.commit()
-
-
 def auth(user, action, job, name):
     '''
     Function to check if user is authorized to perform an action.
@@ -111,13 +99,17 @@ def auth(user, action, job, name):
     else:
         accessed_time = datetime.now() + timedelta(hours=10)
         log_action = Log(timestamp=accessed_time, action=f"User {auth_user.name} {action} {job} {name}")
-        db.session.add(log_action)
-        db.session.commit()
+        check_log = Log.query.order_by(Log.id.desc()).first()
+        if check_log == log_action:
+            pass
+        else:
+            db.session.add(log_action)
+            db.session.commit()
     return auth_user.rights
 
 
 def mail_manager(recipients, body):
-    msg = Message('Notification from Stamp Production Manager', sender='0710160@gmail.com', recipients=recipients)
+    msg = Message('Notification from Stamp Production Viewer', sender='0710160@gmail.com', recipients=recipients)
     msg.body=body
     mail.send(msg)
     return "Sent"
@@ -151,7 +143,6 @@ app.jinja_env.filters['datefilter'] = datefilter
 @app.route("/")
 @login_required
 def home():
-    # Displays all jobs and orders by priority
     if auth(user=current_user.id, action="accessed dashboard", job='N/A', name='') >= 1:
         stamp_jobs = Jobs.query.order_by(Jobs.due_date).filter(Jobs.scheduled == 1, Jobs.completed == False)
         outstanding_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.status == "submitted")
@@ -198,7 +189,7 @@ def complete_quote(job_id):
     if auth(user=current_user.id, action="confirmed quote", job=edit_job.job_no, name=edit_job.job_name) >= 3:
             edit_job.status = "submitted"
             edit_job.due_date = datetime.now() + timedelta(hours=10)
-            refresh_priority()
+            db.session.commit()
     else:
         flash("You are not authorized to perform this action.")
     return redirect(request.referrer)
@@ -215,7 +206,6 @@ def add_job(job_id):
                 logged_in=current_user.is_authenticated)
         else:
             job_no = request.form["job_no"]
-            job_name = new_job.job_name
             due_date = (request.form["due_date"])
             due_date = datetime.strptime(due_date, "%Y-%m-%d")
             notes = request.form["notes"]
@@ -231,7 +221,6 @@ def add_job(job_id):
             new_job.status=status
             new_job.img_name=f'job{job_no}'
             db.session.commit()
-            refresh_priority()
             return redirect(url_for('home', logged_in=current_user.is_authenticated))
     else:
         flash("You are not authorized to perform this action.")
@@ -283,7 +272,6 @@ def edit(job_id):
                 edit_job.status = f'On proof {current_date}'
             elif request.form['status'] == "approved":
                 auth(user=current_user.id, action="marked proof approved on job", job=edit_job.job_no, name=edit_job.job_name)
-                #mail_manager(['xlvi@mm.st'], f'This is an automated notification from Stamp Production Manager. Job {edit_job.job_name} is approved to print.')
                 edit_job.status = f'Proof approved {current_date}'
                 edit_job.approved = True
             elif request.form['status'] == "printed":
@@ -298,7 +286,8 @@ def edit(job_id):
             elif request.form['status'] == "dispatched":
                 auth(user=current_user.id, action="marked dispatched job", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.status = f'Dispatched {current_date}'
-            refresh_priority()
+            #mail_manager('xlvi@mm.st', f'Edited job {edit_job}')
+            db.session.commit()
             return redirect(url_for('home', logged_in=current_user.is_authenticated))
     else:
         flash("You are not authorized to perform this action.")
@@ -316,9 +305,8 @@ def status(job_id):
             job_edit.status = f"On proof {current_date}"
             auth(user=current_user.id, action="marked on proof job", job=job_edit.job_no, name=job_edit.job_name)
         elif job_edit.status.startswith("On proof"):
-            auth(user=current_user.id, action="marked proof approved on job", job=job_edit.job_no, name=job_edit.job_name)
-            #mail_manager(['xlvi@mm.st'], f'This is an automated notification from Stamp Production Manager. Job {job_edit.job_name} is approved to print.')
             job_edit.status = f"Proof approved {current_date}"
+            auth(user=current_user.id, action="marked proof approved on job", job=job_edit.job_no, name=job_edit.job_name)
             job_edit.approved = True
         elif job_edit.status.startswith("Proof approved"):
             auth(user=current_user.id, action="marked printed job", job=job_edit.job_no, name=job_edit.job_name)
@@ -342,7 +330,6 @@ def status(job_id):
                 pass
         else:
             job_edit.status = job_edit.status
-        refresh_priority()
         db.session.commit()
         return redirect(request.referrer)
     else:
