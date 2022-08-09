@@ -8,6 +8,7 @@ from flask_login import UserMixin, login_user, LoginManager, login_required, cur
 from telegram_bot import TelegramBot
 from dotenv import load_dotenv
 from pathlib import Path
+from flask_mail import Mail, Message
 import os
 
 load_dotenv()
@@ -29,6 +30,15 @@ db = SQLAlchemy(app)
 # Flask login manager
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+
+# Flask Mail manager
+app.config['MAIL_SERVER']='smtp.fastmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = 'mtobin@fastmail.fm'
+app.config['MAIL_PASSWORD'] = 'f6dsb9me6m946hj2'
+app.config['MAIL_USE_SSL'] = True
+mail = Mail(app)
 
 
 @login_manager.user_loader
@@ -71,18 +81,6 @@ class Log(db.Model):
 #db.create_all()
 
 
-def refresh_priority():
-    ''' Function to count all jobs in DB and re-arrange based on priority where 1 is highest '''
-    all_jobs = Jobs.query.order_by(Jobs.priority).filter(Jobs.completed == False)
-    new_priority = 1
-    all_jobs = Jobs.query.order_by(Jobs.priority).all()
-    new_priority = 0
-    for job in all_jobs:
-        job.priority = new_priority
-        new_priority += 1
-    db.session.commit()
-
-
 def auth(user, action, job, name):
     '''
     Function to check if user is authorized to perform an action.
@@ -100,9 +98,22 @@ def auth(user, action, job, name):
     else:
         accessed_time = datetime.now() + timedelta(hours=10)
         log_action = Log(timestamp=accessed_time, action=f"User {auth_user.name} {action} {job} {name}")
-        db.session.add(log_action)
-        db.session.commit()
+        check_log = Log.query.order_by(Log.id.desc()).first()
+        if check_log == log_action:
+            pass
+        else:
+            db.session.add(log_action)
+            db.session.commit()
     return auth_user.rights
+
+
+def mail_manager(recipients, body):
+    msg = Message('Notification from Stamp Production Viewer', sender='stamps@scolour.co.nz', recipients=recipients)
+    for recipient in recipients:
+        full_body = body + f'\n\nThis message was sent automatically based on your preferred email preferences. To change what you\'d like to recieve, please visit http://www.jobslist.scolour.co.nz/user/{recipient}.'
+        msg.body=full_body
+        mail.send(msg)
+    return "Sent"
 
 
 def auth_user_min(user):
@@ -133,7 +144,6 @@ app.jinja_env.filters['datefilter'] = datefilter
 @app.route("/")
 @login_required
 def home():
-    # Displays all jobs and orders by priority
     if auth(user=current_user.id, action="accessed dashboard", job='N/A', name='') >= 1:
         stamp_jobs = Jobs.query.order_by(Jobs.due_date).filter(Jobs.scheduled == 1, Jobs.completed == False)
         outstanding_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.status == "submitted")
@@ -180,7 +190,7 @@ def complete_quote(job_id):
     if auth(user=current_user.id, action="confirmed quote", job=edit_job.job_no, name=edit_job.job_name) >= 3:
             edit_job.status = "submitted"
             edit_job.due_date = datetime.now() + timedelta(hours=10)
-            refresh_priority()
+            db.session.commit()
     else:
         flash("You are not authorized to perform this action.")
     return redirect(request.referrer)
@@ -197,7 +207,6 @@ def add_job(job_id):
                 logged_in=current_user.is_authenticated)
         else:
             job_no = request.form["job_no"]
-            job_name = new_job.job_name
             due_date = (request.form["due_date"])
             due_date = datetime.strptime(due_date, "%Y-%m-%d")
             notes = request.form["notes"]
@@ -213,7 +222,6 @@ def add_job(job_id):
             new_job.status=status
             new_job.img_name=f'job{job_no}'
             db.session.commit()
-            refresh_priority()
             return redirect(url_for('home', logged_in=current_user.is_authenticated))
     else:
         flash("You are not authorized to perform this action.")
@@ -244,12 +252,6 @@ def edit(job_id):
                 new_due_date = request.form["new_due_date"]
                 new_due_date = datetime.strptime(new_due_date, "%Y-%m-%d")
                 edit_job.due_date = new_due_date
-            if request.form["new_priority"] == "":
-                pass
-            else:
-                auth(user=current_user.id, action="edited priority on job", job=edit_job.job_no, name=edit_job.job_name)
-                new_priority = request.form["new_priority"]
-                edit_job.priority = new_priority
             if request.form["notes"] == "":
                 pass
             elif request.form["notes"] == " ":
@@ -285,7 +287,8 @@ def edit(job_id):
             elif request.form['status'] == "dispatched":
                 auth(user=current_user.id, action="marked dispatched job", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.status = f'Dispatched {current_date}'
-            refresh_priority()
+            mail_manager(recipients=['xlvi@mm.st'], body=f'Edited job {edit_job.job_no} {edit_job.job_name}.')
+            db.session.commit()
             return redirect(url_for('home', logged_in=current_user.is_authenticated))
     else:
         flash("You are not authorized to perform this action.")
@@ -328,7 +331,6 @@ def status(job_id):
                 pass
         else:
             job_edit.status = job_edit.status
-        refresh_priority()
         db.session.commit()
         return redirect(request.referrer)
     else:
@@ -492,6 +494,47 @@ def admin():
             return redirect(url_for('home', logged_in=current_user.is_authenticated))
     else:
         flash("You are not authorized to perform this action.")
+        return redirect(url_for('home', logged_in=current_user.is_authenticated))
+
+
+@app.route("/user/<id>", methods=["GET", "POST"])
+@login_required
+def user(id):
+    edit_user = User.query.get(id)
+    if request.method == "GET":
+        return render_template("user.html",
+                                user=edit_user,
+                                logged_in=current_user.is_authenticated)
+    else:
+        pass
+        user.name = request.form["email"]
+        user.password = generate_password_hash(
+            request.form["password"],
+            method='pbkdf2:sha256',
+            salt_length=8
+            )
+        try:
+        if request.form.getlist('entered')[0]:
+            entered = '1'
+        except IndexError:
+            entered = '0'
+        try:
+        if request.form.getlist('approved')[0]:
+            approved = '1'
+        except IndexError:
+            approved = '0'
+        try:
+        if request.form.getlist('dispatched')[0]:
+            dispatched = '1'
+        except IndexError:
+            dispatched = '0'
+        try:
+        if request.form.getlist('delivered')[0]:
+            delivered = '1'
+        except IndexError:
+            delivered = '0'
+        user.email_preferences = entered+approved+dispatched+delivered
+        db.session.commit()
         return redirect(url_for('home', logged_in=current_user.is_authenticated))
 
 
