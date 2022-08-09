@@ -27,7 +27,6 @@
       <ul>
         <li>5 = Admin (all rights)</li>
         <li>4 = Edit quotes & jobs</li>
-        <li>3 = Add quotes & jobs</li>
         <li>2 = Unused</li>
         <li>1 = Read Only</li>
         <li>0 = Account Only</li>
@@ -45,12 +44,43 @@
     </div>
   </div>
 
-  <h2>User Action Log:</h2>
-  <div style="height:300px;width:75vw;overflow:auto;">
-    {% for log in all_logs %}
-    <ul>{{ log.timestamp}} - {{ log.action }}</ul>
-    {% endfor %}
-  </div>
-</div>
+    <div class="container">
+    <h3>User Action Log</h3>
+      <table id="logTable" class="table">
+        <tr class="header">
+          <th scope="col"><input type="text" placeholder="Filter log" id="logInput" onkeyup="logFunction()"></th>
+        </tr>
+        {% for log in all_logs %}
+        <tr>
+            <td data-keywords="{{ log.action }}">{{ log.timestamp}} - {{ log.action }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
 
-{% endblock %}
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+  <script>
+    function logFunction() {
+      // Declare variables
+      var input, filter, table, tr, td, i, txtValue;
+      input = document.getElementById("logInput");
+      filter = input.value.toUpperCase();
+      table = document.getElementById("logTable");
+      tr = table.getElementsByTagName("tr");
+
+      // Loop through all table rows, and hide those who don't match the search query
+      for (i = 0; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName("td")[0];
+        if (td) {
+          txtValue = td.textContent || td.innerText;
+          if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+          } else {
+            tr[i].style.display = "none";
+          }
+        }
+      }
+    }
+  </script>
+  {% endblock %}
