@@ -13,6 +13,7 @@ import os
 
 load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY')
+MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
 
 # UPLOAD_FOLDER = 'static/uploads/'
 UPLOAD_FOLDER = '/home/0710160/mysite/static/uploads'
@@ -36,7 +37,7 @@ login_manager.init_app(app)
 app.config['MAIL_SERVER']='smtp.fastmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = 'mtobin@fastmail.fm'
-app.config['MAIL_PASSWORD'] = 'f6dsb9me6m946hj2'
+app.config['MAIL_PASSWORD'] = MAIL_PASSWORD
 app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
 
