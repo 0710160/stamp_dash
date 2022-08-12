@@ -26,8 +26,8 @@ h1 {
   font-weight: 700;
   font-size: 1.5em;
   margin-top: 6px;
-  /*color: #06038D; find a better match and position to SCP BSPG logo*/
-  color: rgba(0,0,0,0)
+  /*color: #06038D;*/
+  color: rgba(0,0,0,0);
   }
 
 h2 {
@@ -235,20 +235,20 @@ DASHBOARD
 -----------------------------------------------------------------*/
 .full-bg {
   position: absolute;
-  background-image: url(gradienta.webp);
+  background-image: url(gradienta.png);
   background-size: cover;
   background-repeat: repeat-y;
-  padding: 7% 3%;
+  padding: 7% 1%;
   z-index: -1;
 }
 
 .job-card {
-  width: 300px;
+  width: 275px;
 }
 
 .quote-card,.card {
   background-color: rgba(255, 255, 255, 0.8);
-  margin: 1%;
+  margin: 0.75vw;
   border-radius: 10px;
   border: none;
 }
@@ -270,7 +270,7 @@ DASHBOARD
 }
 
 .card h3 {
-  font-size: 1.2em;
+  font-size: 1.1em;
   }
 
 .aspect-box {
@@ -284,7 +284,7 @@ DASHBOARD
   background-position: center;*/
   object-fit: contain;
   height: max(180px, 100%);
-  width: max(300px, 100%);
+  width: max(275px, 100%);
   border-radius: 10px 10px 0 0;
 }
 
@@ -340,14 +340,29 @@ ANIMATIONS
 
 /*-----------------------------------------------------------------
 MEDIA QUERIES
------------------------------------------------------------------*/
-@media only screen and (max-width: 800px) {
+-----------------------------------------------------------------
+@media only screen and (max-width:1300px) {
+    .buttons {
+        width: 120px;
+        font-size: 0.9em
+    }
+
+    h1 {
+        font-size: 1.2em;
+    }
+
+    h2 {
+        font-size: 1.0em;
+    }
+
+    h4,a,p,th {
+        font-size: 0.9em;
+    }
+}*/
+
+@media only screen and (max-width: 600px) {
   .full-bg {
     background-size: contain;
-  }
-
-  .job-card {
-    width: 500px;
   }
 
   .mobile-hidden {

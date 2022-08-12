@@ -24,6 +24,7 @@
           </div>
         </a>
         <hr>
+        <h4>Value: ${{ i.priority }}</h4>
         <h4>Due date: {{ i.due_date | datefilter }}</h4>
         {% if i.status.startswith('Dispatched') %}
         <a href="/status/{{ i.id }}" onclick="return confirm('Are you sure you want to remove this delivered job?')">
@@ -31,10 +32,9 @@
         <a href="/status/{{ i.id }}">
           {% endif %}
           {{ i.status }}
-        </a>
-        <br><br>
+        </a><br>
         {% if i.notes %}
-        <p>Notes: {{ i.notes }}</p>
+        <h4>Notes: {{ i.notes }}</h4>
         {% endif %}
       </div>
     </div>

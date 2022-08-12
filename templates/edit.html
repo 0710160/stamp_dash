@@ -21,6 +21,7 @@
                             </div>
                             <!--h4>Current due date: {{ job.due_date }}</h4-->
                             <input type="string", name="new_name", placeholder="{{ job.job_name }}">
+                            <input type="string", name="new_value", placeholder="Value: ${{ job.priority }}">
                             <input type="date", name="new_due_date", placeholder="{{ job.due_date }}"><br>
                             <select name="status", style="width:300px;">
                                 <option value="curr">{{ job.status }}</option>
