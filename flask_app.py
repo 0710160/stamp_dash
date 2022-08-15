@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import desc
+from sqlalchemy import desc, ForeignKey
+from sqlalchemy.orm import relationship
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.exceptions import HTTPException
@@ -61,7 +62,7 @@ class Jobs(db.Model):
     status = db.Column(db.String)
     notes = db.Column(db.String)
     img_name = db.Column(db.String(250))
-    is_stamp = db.Column(db.Boolean, default=False)
+    is_stamp = db.Column(db.Boolean, default=False)  #unused
     logs = relationship("Log", back_populates="jobs")
 
 
@@ -80,15 +81,15 @@ class Log(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     timestamp = db.Column(db.DateTime)
     action = db.Column(db.String(100))
-    job_no = Column(ForeignKey("jobs.job_no"))
-    jobs = relationship("Jobs", back_populates="log")
+    job_no = db.Column(db.String, ForeignKey("jobs.job_no"))
+    jobs = relationship("Jobs", back_populates="logs")
 
 
 
-#db.create_all()
+db.create_all()
 
 
-def auth(user, action, job_no, job, name):
+def auth(user, action, job, name):
     '''
     Function to check if user is authorized to perform an action.
         5 = Admin (all rights)
@@ -258,6 +259,7 @@ def add_job(job_id):
 @login_required
 def edit(job_id):
     edit_job = Jobs.query.get(job_id)
+    logs = Log.query.filter_by(job_no=edit_job.job_no).all()
     if auth_user_min(user=current_user.id) >= 4:
         if request.method == "GET":
             filename = Path(os.path.join(app.config['UPLOAD_FOLDER'], edit_job.img_name))
@@ -268,6 +270,7 @@ def edit(job_id):
             return render_template("edit.html",
                                    file_exists=file_exists,
                                    job=edit_job,
+                                   log=logs,
                                    logged_in=current_user.is_authenticated)
         else:
             current_date = time_adjusted()

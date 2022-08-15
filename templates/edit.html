@@ -43,8 +43,28 @@
                             <a class="btn btn-light buttons" href="{{ url_for('home') }}">Return Home</a><br>
                             <a class="btn btn-danger buttons" href="/delete/{{ job.id }}">Delete Job</a>
                     </form>
+		<br>
                 </div>
-            </div></div>
+		</div>
+		<div class="table-div">
+		    <table class="table table-bordered table-sm">
+			    <thead>
+				    <tr>
+					    <th scope="col">Timestamp</th>
+					    <th scope="col">Action</th>
+				    </tr>
+			    </thead>
+			    <tbody>
+				    {% for i in log %}
+				    <tr>
+					    <td>{{ i.timestamp }}</td>
+					    <td>{{ i.action }}</td>
+				    </tr>
+				    {% endfor %}
+			    </tbody>
+		    </table>
+		</div>
+	</div>
         </div>
     </div>
 
