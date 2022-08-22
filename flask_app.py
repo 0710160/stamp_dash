@@ -14,7 +14,7 @@ import os
 
 load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY')
-MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+APP_PASSWORD = os.getenv('APP_PASSWORD')
 
 # UPLOAD_FOLDER = 'static/uploads/'
 UPLOAD_FOLDER = '/home/0710160/mysite/static/uploads'
@@ -38,7 +38,7 @@ login_manager.init_app(app)
 app.config['MAIL_SERVER']='smtp.fastmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = 'mtobin@fastmail.fm'
-app.config['MAIL_PASSWORD'] = MAIL_PASSWORD
+app.config['MAIL_PASSWORD'] = APP_PASSWORD
 app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
 
@@ -73,6 +73,7 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(250))
     password = db.Column(db.String(100))
     rights = db.Column(db.Integer, default=0)  # 0 is no access, 1 is read-only, 5 is admin
+    email_preferences = db.Column(db.String)
 
 
 class Log(db.Model):
@@ -83,7 +84,6 @@ class Log(db.Model):
     action = db.Column(db.String(100))
     job_no = db.Column(db.String, ForeignKey("jobs.job_no"))
     jobs = relationship("Jobs", back_populates="logs")
-
 
 
 db.create_all()
@@ -116,7 +116,7 @@ def auth(user, action, job, name):
 
 
 def mail_manager(recipients, body):
-    msg = Message('Notification from Stamp Production Viewer', sender='stamps@scolour.co.nz', recipients=recipients)
+    msg = Message('Notification from Stamp Production Viewer', sender='stamps@sent.com', recipients=recipients)
     for recipient in recipients:
         full_body = body + f'\n\nThis message was sent automatically based on your preferred email preferences. To change what you\'d like to recieve, please visit http://www.jobslist.scolour.co.nz/user/{recipient}.'
         msg.body=full_body
@@ -186,7 +186,9 @@ def all():
 @app.route("/add_quote", methods=["GET", "POST"])
 @login_required
 def add_quote():
-    if auth(user=current_user.id, action="added quote", job="{new}", name='') >= 3:
+    last_job = Jobs.query.order_by(Jobs.id.desc()).first()
+    last_id_plus_one = last_job.id + 1
+    if auth(user=current_user.id, action="added quote", job=last_id, name='') >= 3:
         if request.method == "GET":
             return render_template("add_quote.html", logged_in=current_user.is_authenticated)
         else:
@@ -194,7 +196,7 @@ def add_quote():
             due_date = request.form["due_date"]
             due_date = datetime.strptime(due_date, "%Y-%m-%d")
             notes = request.form["notes"]
-            add_quote = Jobs(job_no="NULL",
+            add_quote = Jobs(job_no=last_id_plus_one,
                            job_name=job_name,
                            due_date=due_date,
                            status="todo",
@@ -212,7 +214,7 @@ def add_quote():
 @login_required
 def complete_quote(job_id):
     edit_job = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="confirmed quote", job='', name=edit_job.job_name) >= 3:
+    if auth(user=current_user.id, action="confirmed quote", job=edit_job.job_no, name=edit_job.job_name) >= 3:
             edit_job.status = "submitted"
             edit_job.due_date = datetime.now() + timedelta(hours=10)
             db.session.commit()
@@ -225,7 +227,7 @@ def complete_quote(job_id):
 @login_required
 def add_job(job_id):
     new_job = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="added job", job='', name=new_job.job_name) >= 3:
+    if auth(user=current_user.id, action="added job", job=new_job.job_no, name=new_job.job_name) >= 3:
         if request.method == "GET":
             return render_template("add_job.html",
                 job_name=new_job.job_name,
@@ -242,7 +244,7 @@ def add_job(job_id):
             current_date = time_adjusted()
             status = f'Entered {current_date}'
             new_job.job_no=job_no
-            new_job.job_value=value
+            new_job.job_value=job_value
             new_job.due_date=due_date
             new_job.notes=notes
             new_job.scheduled=1
@@ -322,7 +324,7 @@ def edit(job_id):
             elif request.form['status'] == "dispatched":
                 auth(user=current_user.id, action="marked dispatched job", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.status = f'Dispatched {current_date}'
-            #mail_manager(recipients=['xlvi@mm.st'], body=f'Edited job {edit_job.job_no} {edit_job.job_name}.')
+            mail_manager(recipients=['cviii@mm.st'], body=f'Edited job {edit_job.job_no} {edit_job.job_name}.')
             db.session.commit()
             return redirect(url_for('home', logged_in=current_user.is_authenticated))
     else:
@@ -532,10 +534,10 @@ def admin():
         return redirect(url_for('home', logged_in=current_user.is_authenticated))
 
 
-@app.route("/user/<id>", methods=["GET", "POST"])
+@app.route("/user/<name>", methods=["GET", "POST"])
 @login_required
-def user(id):
-    edit_user = User.query.get(id)
+def user(name):
+    edit_user = User.query.filter(User.name == name)
     if request.method == "GET":
         return render_template("user.html",
                                 user=edit_user,

@@ -57,8 +57,11 @@
 			    <tbody>
 				    {% for i in log %}
 				    <tr>
+              {% if 'NULL' in i.action %}
+              {% else %}
 					    <td>{{ i.timestamp }}</td>
 					    <td>{{ i.action }}</td>
+              {% endif %}
 				    </tr>
 				    {% endfor %}
 			    </tbody>
