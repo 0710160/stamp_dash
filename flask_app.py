@@ -188,7 +188,7 @@ def all():
 def add_quote():
     last_job = Jobs.query.order_by(Jobs.id.desc()).first()
     last_id_plus_one = last_job.id + 1
-    if auth(user=current_user.id, action="added quote", job=last_id, name='') >= 3:
+    if auth(user=current_user.id, action="added quote", job=last_id_plus_one, name='') >= 3:
         if request.method == "GET":
             return render_template("add_quote.html", logged_in=current_user.is_authenticated)
         else:
