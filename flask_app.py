@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import desc
+from sqlalchemy import desc, ForeignKey
+from sqlalchemy.orm import relationship
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.exceptions import HTTPException
@@ -48,24 +49,26 @@ def load_user(user_id):
 
 
 class Jobs(db.Model):
-    ''' Creates a DB for the job information '''
+    ''' DB for the job information '''
+    __tablename__= "jobs"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     job_no = db.Column(db.String, nullable=False)
     job_name = db.Column(db.String(250), nullable=False)
     due_date = db.Column(db.Date)
-    priority = db.Column(db.Float, default=9)
+    job_value = db.Column(db.Integer)
     plates_made = db.Column(db.Boolean, default=False)
     scheduled = db.Column(db.Integer, default=False)
-    approved = db.Column(db.Boolean, default=False)
     completed = db.Column(db.Boolean, default=False)
     status = db.Column(db.String)
     notes = db.Column(db.String)
     img_name = db.Column(db.String(250))
-    is_stamp = db.Column(db.Boolean, default=False)
+    is_stamp = db.Column(db.Boolean, default=False)  #unused
+    logs = relationship("Log", back_populates="jobs")
 
 
 class User(UserMixin, db.Model):
-    ''' Creates a DB for the user information '''
+    ''' DB for the user information '''
+    __tablename__ = "user"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250))
     password = db.Column(db.String(100))
@@ -73,13 +76,17 @@ class User(UserMixin, db.Model):
 
 
 class Log(db.Model):
-    ''' Creates a DB for user action logs '''
+    ''' DB for user action logs '''
+    __tablename__ = "log"
     id = db.Column(db.Integer, primary_key=True)
     timestamp = db.Column(db.DateTime)
     action = db.Column(db.String(100))
+    job_no = db.Column(db.String, ForeignKey("jobs.job_no"))
+    jobs = relationship("Jobs", back_populates="logs")
 
 
-#db.create_all()
+
+db.create_all()
 
 
 def auth(user, action, job, name):
@@ -98,9 +105,9 @@ def auth(user, action, job, name):
         pass
     else:
         accessed_time = datetime.now() + timedelta(hours=10)
-        log_action = Log(timestamp=accessed_time, action=f"User {auth_user.name} {action} {job} {name}")
+        log_action = Log(timestamp=accessed_time, job_no=job, action=f"User {auth_user.name} {action} {job} {name}")
         check_log = Log.query.order_by(Log.id.desc()).first()
-        if check_log == log_action:
+        if check_log.action == log_action.action:
             pass
         else:
             db.session.add(log_action)
@@ -145,8 +152,25 @@ app.jinja_env.filters['datefilter'] = datefilter
 @app.route("/")
 @login_required
 def home():
-    if auth(user=current_user.id, action="accessed dashboard", job='N/A', name='') >= 1:
+    if auth(user=current_user.id, action="accessed dashboard", job='', name='') >= 1:
         stamp_jobs = Jobs.query.order_by(Jobs.due_date).filter(Jobs.scheduled == 1, Jobs.completed == False)
+        outstanding_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.status == "submitted")
+        to_do_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.status == "todo")
+        return render_template("dashboard.html",
+                               all_jobs=stamp_jobs,
+                               outstanding_quotes=outstanding_quotes,
+                               to_do_quotes=to_do_quotes,
+                               logged_in=current_user.is_authenticated)
+    else:
+        flash(f"Please register a user to view this content.\nIf you've already signed up, please wait for the administrator to approve your user.")
+        return redirect(url_for('new_user'))
+
+
+@app.route("/all")
+@login_required
+def all():
+    if auth(user=current_user.id, action="accessed dashboard", job='', name='') >= 1:
+        stamp_jobs = Jobs.query.order_by(Jobs.due_date).filter(Jobs.scheduled == 1)
         outstanding_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.status == "submitted")
         to_do_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.status == "todo")
         return render_template("dashboard.html",
@@ -188,7 +212,7 @@ def add_quote():
 @login_required
 def complete_quote(job_id):
     edit_job = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="confirmed quote", job=edit_job.job_no, name=edit_job.job_name) >= 3:
+    if auth(user=current_user.id, action="confirmed quote", job='', name=edit_job.job_name) >= 3:
             edit_job.status = "submitted"
             edit_job.due_date = datetime.now() + timedelta(hours=10)
             db.session.commit()
@@ -201,13 +225,14 @@ def complete_quote(job_id):
 @login_required
 def add_job(job_id):
     new_job = Jobs.query.get(job_id)
-    if auth(user=current_user.id, action="added job", job=job_id, name=new_job.job_name) >= 3:
+    if auth(user=current_user.id, action="added job", job='', name=new_job.job_name) >= 3:
         if request.method == "GET":
             return render_template("add_job.html",
                 job_name=new_job.job_name,
                 logged_in=current_user.is_authenticated)
         else:
             job_no = request.form["job_no"]
+            job_value = request.form["job_value"]
             due_date = (request.form["due_date"])
             due_date = datetime.strptime(due_date, "%Y-%m-%d")
             notes = request.form["notes"]
@@ -217,6 +242,7 @@ def add_job(job_id):
             current_date = time_adjusted()
             status = f'Entered {current_date}'
             new_job.job_no=job_no
+            new_job.job_value=value
             new_job.due_date=due_date
             new_job.notes=notes
             new_job.scheduled=1
@@ -233,6 +259,7 @@ def add_job(job_id):
 @login_required
 def edit(job_id):
     edit_job = Jobs.query.get(job_id)
+    logs = Log.query.filter_by(job_no=edit_job.job_no).all()
     if auth_user_min(user=current_user.id) >= 4:
         if request.method == "GET":
             filename = Path(os.path.join(app.config['UPLOAD_FOLDER'], edit_job.img_name))
@@ -243,6 +270,7 @@ def edit(job_id):
             return render_template("edit.html",
                                    file_exists=file_exists,
                                    job=edit_job,
+                                   log=logs,
                                    logged_in=current_user.is_authenticated)
         else:
             current_date = time_adjusted()
@@ -267,6 +295,12 @@ def edit(job_id):
                 job_name = request.form["new_name"]
                 auth(user=current_user.id, action="edited job name on job", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.job_name = job_name
+            if request.form["new_value"] == "":
+                pass
+            else:
+                job_value = request.form["new_value"]
+                auth(user=current_user.id, action="edited value on job", job=edit_job.job_no, name=edit_job.job_name)
+                edit_job.job_value = job_value
             if request.form['status'] == "curr":
                 pass
             elif request.form['status'] == "proof":
@@ -288,7 +322,7 @@ def edit(job_id):
             elif request.form['status'] == "dispatched":
                 auth(user=current_user.id, action="marked dispatched job", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.status = f'Dispatched {current_date}'
-            mail_manager(recipients=['xlvi@mm.st'], body=f'Edited job {edit_job.job_no} {edit_job.job_name}.')
+            #mail_manager(recipients=['xlvi@mm.st'], body=f'Edited job {edit_job.job_no} {edit_job.job_name}.')
             db.session.commit()
             return redirect(url_for('home', logged_in=current_user.is_authenticated))
     else:
@@ -507,33 +541,30 @@ def user(id):
                                 user=edit_user,
                                 logged_in=current_user.is_authenticated)
     else:
-        pass
-        user.name = request.form["email"]
-        user.password = generate_password_hash(
-            request.form["password"],
-            method='pbkdf2:sha256',
-            salt_length=8
-            )
-        try:
+        if request.form["email"] == "":
+            pass
+        else:
+            user.name = request.form["email"]
+        if request.form["password"] == "":
+            pass
+        else:
+            user.password = generate_password_hash(
+                request.form["password"],
+                method='pbkdf2:sha256',
+                salt_length=8
+                )
+        entered = '0'
+        approved = '0'
+        dispatched = '0'
+        delivered = '0'
         if request.form.getlist('entered')[0]:
             entered = '1'
-        except IndexError:
-            entered = '0'
-        try:
         if request.form.getlist('approved')[0]:
             approved = '1'
-        except IndexError:
-            approved = '0'
-        try:
         if request.form.getlist('dispatched')[0]:
             dispatched = '1'
-        except IndexError:
-            dispatched = '0'
-        try:
         if request.form.getlist('delivered')[0]:
             delivered = '1'
-        except IndexError:
-            delivered = '0'
         user.email_preferences = entered+approved+dispatched+delivered
         db.session.commit()
         return redirect(url_for('home', logged_in=current_user.is_authenticated))
