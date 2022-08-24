@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 from flask_mail import Mail, Message
 import os
+import json
 
 load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY')
@@ -32,7 +33,6 @@ db = SQLAlchemy(app)
 # Flask login manager
 login_manager = LoginManager()
 login_manager.init_app(app)
-
 
 # Flask Mail manager
 app.config['MAIL_SERVER']='smtp.fastmail.com'
@@ -218,6 +218,17 @@ def complete_quote(job_id):
             edit_job.status = "submitted"
             edit_job.due_date = datetime.now() + timedelta(hours=10)
             db.session.commit()
+
+            # Hit rate Update
+            f = open('hit_rate.json', 'r')
+            js_data = json.load(f)
+            f.close()
+            js_data["quotes"] = (js_data["quotes"] + 1)
+            js_data["rate"] = js_data["won"] / js_data["quotes"]
+            f = open('hit_rate.json', 'w+')
+            f.write(json.dumps(js_data))
+            f.close()
+
     else:
         flash("You are not authorized to perform this action.")
     return redirect(request.referrer)
