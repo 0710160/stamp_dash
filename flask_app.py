@@ -160,6 +160,7 @@ def home():
                                all_jobs=stamp_jobs,
                                outstanding_quotes=outstanding_quotes,
                                to_do_quotes=to_do_quotes,
+                               all=False,
                                logged_in=current_user.is_authenticated)
     else:
         flash(f"Please register a user to view this content.\nIf you've already signed up, please wait for the administrator to approve your user.")
@@ -177,6 +178,7 @@ def all():
                                all_jobs=stamp_jobs,
                                outstanding_quotes=outstanding_quotes,
                                to_do_quotes=to_do_quotes,
+                               all=True,
                                logged_in=current_user.is_authenticated)
     else:
         flash(f"Please register a user to view this content.\nIf you've already signed up, please wait for the administrator to approve your user.")
