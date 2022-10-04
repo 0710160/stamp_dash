@@ -11,7 +11,6 @@ from dotenv import load_dotenv
 from pathlib import Path
 from flask_mail import Mail, Message
 import os
-import json
 
 load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY')
@@ -73,7 +72,7 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(250))
     password = db.Column(db.String(100))
     rights = db.Column(db.Integer, default=0)  # 0 is no access, 1 is read-only, 5 is admin
-    email_preferences = db.Column(db.String)
+    #email_preferences = db.Column(db.String)
 
 
 class Log(db.Model):
@@ -118,7 +117,7 @@ def auth(user, action, job, name):
 def mail_manager(recipients, body):
     msg = Message('Notification from Stamp Production Viewer', sender='stamps@sent.com', recipients=recipients)
     for recipient in recipients:
-        full_body = body + f'\n\nThis message was sent automatically based on your preferred email preferences. To change what you\'d like to recieve, please visit http://www.jobslist.scolour.co.nz/user/{recipient}.'
+        full_body = body + f'\n\nThis message was sent automatically from http://www.jobslist.scolour.co.nz/'
         msg.body=full_body
         mail.send(msg)
     return "Sent"
@@ -221,16 +220,6 @@ def complete_quote(job_id):
             edit_job.due_date = datetime.now() + timedelta(hours=10)
             db.session.commit()
 
-            # Hit rate Update
-            f = open('hit_rate.json', 'r')
-            js_data = json.load(f)
-            f.close()
-            js_data["quotes"] = (js_data["quotes"] + 1)
-            js_data["rate"] = js_data["won"] / js_data["quotes"]
-            f = open('hit_rate.json', 'w+')
-            f.write(json.dumps(js_data))
-            f.close()
-
     else:
         flash("You are not authorized to perform this action.")
     return redirect(request.referrer)
@@ -324,6 +313,7 @@ def edit(job_id):
             elif request.form['status'] == "approved":
                 auth(user=current_user.id, action="marked proof approved on job", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.status = f'Proof approved {current_date}'
+                mail_manager(recipients=['Stacey.McCormack@brebnerprint.co.nz', 'tim.murphy@scolour.co.nz', 'matt.tobin@brebnerprint.co.nz'], body=f'Stamp job {edit_job.job_no} \'{edit_job.job_name}\' is approved to print, and has a target dispatch date of {edit_job.due_date}.')
                 edit_job.approved = True
             elif request.form['status'] == "printed":
                 auth(user=current_user.id, action="marked printed job", job=edit_job.job_no, name=edit_job.job_name)
@@ -337,7 +327,6 @@ def edit(job_id):
             elif request.form['status'] == "dispatched":
                 auth(user=current_user.id, action="marked dispatched job", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.status = f'Dispatched {current_date}'
-            mail_manager(recipients=['cviii@mm.st'], body=f'Edited job {edit_job.job_no} {edit_job.job_name}.')
             db.session.commit()
             return redirect(url_for('home', logged_in=current_user.is_authenticated))
     else:
@@ -348,39 +337,40 @@ def edit(job_id):
 @app.route("/status/<job_id>")
 @login_required
 def status(job_id):
-    job_edit = Jobs.query.get(job_id)
+    edit_job = Jobs.query.get(job_id)
     # Cycles through job status
     if auth_user_min(user=current_user.id) >= 4:
         current_date = time_adjusted()
-        if job_edit.status.startswith("Entered"):
-            job_edit.status = f"On proof {current_date}"
-            auth(user=current_user.id, action="marked on proof job", job=job_edit.job_no, name=job_edit.job_name)
-        elif job_edit.status.startswith("On proof"):
-            job_edit.status = f"Proof approved {current_date}"
-            auth(user=current_user.id, action="marked proof approved on job", job=job_edit.job_no, name=job_edit.job_name)
-            job_edit.approved = True
-        elif job_edit.status.startswith("Proof approved"):
-            auth(user=current_user.id, action="marked printed job", job=job_edit.job_no, name=job_edit.job_name)
-            job_edit.status = f"Printed {current_date}"
-        elif job_edit.status.startswith("Printed"):
-            auth(user=current_user.id, action="marked finishing job", job=job_edit.job_no, name=job_edit.job_name)
-            job_edit.status = f"Finishing {current_date}"
-        elif job_edit.status.startswith("Finishing"):
-            auth(user=current_user.id, action="marked check & pack job", job=job_edit.job_no, name=job_edit.job_name)
-            job_edit.status = f"Check & pack {current_date}"
-        elif job_edit.status.startswith("Check"):
-            auth(user=current_user.id, action="marked dispatched job", job=job_edit.job_no, name=job_edit.job_name)
-            job_edit.status = f"Dispatched {current_date}"
-        elif job_edit.status.startswith("Dispatched "):
-            auth(user=current_user.id, action="marked delivered job", job=job_edit.job_no, name=job_edit.job_name)
-            job_edit.status = f"Delivered {current_date}"
-            job_edit.completed = True
+        if edit_job.status.startswith("Entered"):
+            edit_job.status = f"On proof {current_date}"
+            auth(user=current_user.id, action="marked on proof job", job=edit_job.job_no, name=edit_job.job_name)
+        elif edit_job.status.startswith("On proof"):
+            edit_job.status = f"Proof approved {current_date}"
+            auth(user=current_user.id, action="marked proof approved on job", job=edit_job.job_no, name=edit_job.job_name)
+            edit_job.approved = True
+            mail_manager(recipients=['Stacey.McCormack@brebnerprint.co.nz', 'tim.murphy@scolour.co.nz', 'matt.tobin@brebnerprint.co.nz'], body=f'Stamp job {edit_job.job_no} \'{edit_job.job_name}\' is approved to print, and has a target dispatch date of {edit_job.due_date}.')
+        elif edit_job.status.startswith("Proof approved"):
+            auth(user=current_user.id, action="marked printed job", job=edit_job.job_no, name=edit_job.job_name)
+            edit_job.status = f"Printed {current_date}"
+        elif edit_job.status.startswith("Printed"):
+            auth(user=current_user.id, action="marked finishing job", job=edit_job.job_no, name=edit_job.job_name)
+            edit_job.status = f"Finishing {current_date}"
+        elif edit_job.status.startswith("Finishing"):
+            auth(user=current_user.id, action="marked check & pack job", job=edit_job.job_no, name=edit_job.job_name)
+            edit_job.status = f"Check & pack {current_date}"
+        elif edit_job.status.startswith("Check"):
+            auth(user=current_user.id, action="marked dispatched job", job=edit_job.job_no, name=edit_job.job_name)
+            edit_job.status = f"Dispatched {current_date}"
+        elif edit_job.status.startswith("Dispatched "):
+            auth(user=current_user.id, action="marked delivered job", job=edit_job.job_no, name=edit_job.job_name)
+            edit_job.status = f"Delivered {current_date}"
+            edit_job.completed = True
             try:
-                os.remove(os.path.join(app.config['UPLOAD_FOLDER'], job_edit.img_name))
+                os.remove(os.path.join(app.config['UPLOAD_FOLDER'], edit_job.img_name))
             except(FileNotFoundError):
                 pass
         else:
-            job_edit.status = job_edit.status
+            edit_job.status = edit_job.status
         db.session.commit()
         return redirect(request.referrer)
     else:
@@ -580,7 +570,7 @@ def user(name):
             dispatched = '1'
         if request.form.getlist('delivered')[0]:
             delivered = '1'
-        user.email_preferences = entered+approved+dispatched+delivered
+        #user.email_preferences = entered+approved+dispatched+delivered
         db.session.commit()
         return redirect(url_for('home', logged_in=current_user.is_authenticated))
 
