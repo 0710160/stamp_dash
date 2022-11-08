@@ -85,7 +85,7 @@ class Log(db.Model):
     jobs = relationship("Jobs", back_populates="logs")
 
 
-db.create_all()
+#db.create_all()
 
 
 def auth(user, action, job, name):
@@ -117,7 +117,7 @@ def auth(user, action, job, name):
 def mail_manager(recipients, body):
     msg = Message('Notification from Stamp Production Viewer', sender='stamps@sent.com', recipients=recipients)
     for recipient in recipients:
-        full_body = body + f'\n\nThis message was sent automatically from http://www.jobslist.scolour.co.nz/'
+        full_body = body + f'\n\nThis message was sent automatically from http://www.jobslist.scolour.co.nz/ To opt out of future emails, reply to this email with UNSUBSCRIBE as the subject.'
         msg.body=full_body
         mail.send(msg)
     return "Sent"
@@ -252,8 +252,11 @@ def add_job(job_id):
             new_job.scheduled=1
             new_job.status=status
             new_job.img_name=f'job{job_no}'
+            mail_manager(recipients=['Ricky.Howes@brebnerprint.co.nz'], body=f'Stamp quote \'{new_job.job_name}\' has been accepted by the client, with a value of ${new_job.job_value}, and a target dispatch date of {new_job.due_date.strftime("%d/%m/%Y")}.')
             db.session.commit()
-            return redirect(url_for('home', logged_in=current_user.is_authenticated))
+            return redirect(url_for('image_handler',
+            job_id=job_id,
+            logged_in=current_user.is_authenticated))
     else:
         flash("You are not authorized to perform this action.")
         return redirect(url_for('home', logged_in=current_user.is_authenticated))
@@ -313,7 +316,7 @@ def edit(job_id):
             elif request.form['status'] == "approved":
                 auth(user=current_user.id, action="marked proof approved on job", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.status = f'Proof approved {current_date}'
-                mail_manager(recipients=['Stacey.McCormack@brebnerprint.co.nz', 'tim.murphy@scolour.co.nz', 'matt.tobin@brebnerprint.co.nz'], body=f'Stamp job {edit_job.job_no} \'{edit_job.job_name}\' is approved to print, and has a target dispatch date of {edit_job.due_date}.')
+                mail_manager(recipients=['Stacey.McCormack@brebnerprint.co.nz', 'tim.murphy@scolour.co.nz', 'matt.tobin@brebnerprint.co.nz'], body=f'Stamp job {edit_job.job_no} \'{edit_job.job_name}\' is approved to print, and has a target dispatch date of {edit_job.due_date.strftime("%d/%m/%Y")}.')
                 edit_job.approved = True
             elif request.form['status'] == "printed":
                 auth(user=current_user.id, action="marked printed job", job=edit_job.job_no, name=edit_job.job_name)
@@ -327,6 +330,7 @@ def edit(job_id):
             elif request.form['status'] == "dispatched":
                 auth(user=current_user.id, action="marked dispatched job", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.status = f'Dispatched {current_date}'
+                mail_manager(recipients=['Stacey.McCormack@brebnerprint.co.nz'], body=f'Stamp job {edit_job.job_no} \'{edit_job.job_name}\' has been dispatched.')
             db.session.commit()
             return redirect(url_for('home', logged_in=current_user.is_authenticated))
     else:
@@ -348,7 +352,7 @@ def status(job_id):
             edit_job.status = f"Proof approved {current_date}"
             auth(user=current_user.id, action="marked proof approved on job", job=edit_job.job_no, name=edit_job.job_name)
             edit_job.approved = True
-            mail_manager(recipients=['Stacey.McCormack@brebnerprint.co.nz', 'tim.murphy@scolour.co.nz', 'matt.tobin@brebnerprint.co.nz'], body=f'Stamp job {edit_job.job_no} \'{edit_job.job_name}\' is approved to print, and has a target dispatch date of {edit_job.due_date}.')
+            mail_manager(recipients=['Stacey.McCormack@brebnerprint.co.nz', 'tim.murphy@scolour.co.nz', 'matt.tobin@brebnerprint.co.nz'], body=f'Stamp job {edit_job.job_no} \'{edit_job.job_name}\' is approved to print, and has a target dispatch date of {edit_job.due_date.strftime("%d/%m/%Y")}.')
         elif edit_job.status.startswith("Proof approved"):
             auth(user=current_user.id, action="marked printed job", job=edit_job.job_no, name=edit_job.job_name)
             edit_job.status = f"Printed {current_date}"
@@ -361,6 +365,7 @@ def status(job_id):
         elif edit_job.status.startswith("Check"):
             auth(user=current_user.id, action="marked dispatched job", job=edit_job.job_no, name=edit_job.job_name)
             edit_job.status = f"Dispatched {current_date}"
+            mail_manager(recipients=['Stacey.McCormack@brebnerprint.co.nz'], body=f'Stamp job {edit_job.job_no} \'{edit_job.job_name}\' has been dispatched.')
         elif edit_job.status.startswith("Dispatched "):
             auth(user=current_user.id, action="marked delivered job", job=edit_job.job_no, name=edit_job.job_name)
             edit_job.status = f"Delivered {current_date}"
@@ -376,6 +381,19 @@ def status(job_id):
     else:
         flash("You are not authorized to perform this action.")
         return redirect(url_for('home', logged_in=current_user.is_authenticated))
+
+
+@app.route("/status_update")
+@login_required
+def status_update():
+    if auth(user=current_user.id, action="created status update", job='', name='') >= 4:
+        stamp_jobs = Jobs.query.order_by(Jobs.due_date).filter(Jobs.scheduled == 1, Jobs.completed == False)
+        return render_template("status_update.html",
+                               all_jobs=stamp_jobs,
+                               logged_in=current_user.is_authenticated)
+    else:
+        flash(f"You are not authorized to perform this action.")
+        return redirect(url_for('home'))
 
 
 @app.route("/image_handler/<job_id>")
@@ -537,6 +555,8 @@ def admin():
         return redirect(url_for('home', logged_in=current_user.is_authenticated))
 
 
+# This part is not in use yet
+'''
 @app.route("/user/<name>", methods=["GET", "POST"])
 @login_required
 def user(name):
@@ -573,6 +593,7 @@ def user(name):
         #user.email_preferences = entered+approved+dispatched+delivered
         db.session.commit()
         return redirect(url_for('home', logged_in=current_user.is_authenticated))
+'''
 
 
 @app.errorhandler(401)
