@@ -12,11 +12,13 @@
     {% if i.status.startswith('Proof') %} approved
     {% elif i.status.startswith('Dispatched') %} dispatched
     {% endif %}">
+    {% if i.completed == False %}
       <div class="title header_img aspect-box">
         <a href="/image_handler/{{ i.id }}">
           <img src="/static/uploads/{{ i.img_name }}" class="job_img">
         </a>
       </div>
+    {% endif %}
       <div class="details">
         <a href="/edit/{{ i.id }}"><!--target="_blank"-->
           <div class="job_name">
@@ -24,7 +26,7 @@
           </div>
         </a>
         <hr>
-        <h4>Value: ${{ i.priority }}</h4>
+        <h4>Value: ${{ i.job_value }}</h4>
         <h4>Due date: {{ i.due_date | datefilter }}</h4>
         {% if i.status.startswith('Dispatched') %}
         <a href="/status/{{ i.id }}" onclick="return confirm('Are you sure you want to remove this delivered job?')">
@@ -33,8 +35,10 @@
           {% endif %}
           {{ i.status }}
         </a><br>
+        {% if all == False %}
         {% if i.notes %}
         <h4>Notes: {{ i.notes }}</h4>
+        {% endif %}
         {% endif %}
       </div>
     </div>
@@ -102,6 +106,10 @@
 
   </div>
 
+  <div class="float-button">
+    <a class="btn btn-light" href="/status_update">Status update</a>
+  </div>
+
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
   <script>
@@ -127,4 +135,5 @@
       }
     }
   </script>
+
   {% endblock %}

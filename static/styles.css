@@ -257,6 +257,10 @@ DASHBOARD
   background-color: rgba(235, 255, 235, 0.8);
 }
 
+.late {
+  background-color: rgba(255, 114, 118, 0.8);
+}
+
 .quote-card {
   padding: 2% 0;
 }
@@ -322,6 +326,11 @@ DASHBOARD
 .table-div {
   background-color: rgba(255, 255, 255, 0.5);
 }
+
+.status_img {
+    object-fit: contain;
+    height: max(45px);
+  }
 
 /*-----------------------------------------------------------------
 ANIMATIONS
