@@ -23,7 +23,7 @@
 
 <nav class="navbar navbar-expand-lg navbar-light nav-custom-bg">
     <a class="navbar-brand" href="{{ url_for('home') }}">
-        <img src="{{ url_for('static', filename='favicon.png') }}" alt="logo", width="80", class="d-inline-block align-text-top">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="logo", width="230", class="d-inline-block align-text-top">
     </a>
     <h1>{% block heading %}{% endblock heading %}</h1>
   <div class="collapse navbar-collapse">
@@ -44,6 +44,8 @@
             <a class="nav-link {% block admin_active %}{% endblock admin_active %}" href="/admin">Admin</a>
         </li>
         <li class="nav-item">
+          <a class="nav-link {% block status_update_active %}{% endblock status_update_active %}" href="{{ url_for('status_update') }}">Status Update</a>
+        <li class="nav-item">
             <a class="nav-link" href="/logout">Log Out</a>
         </li>
         {% endif %}
@@ -57,7 +59,7 @@
 </body>
 <footer {% block hide_footer %}{% endblock hide_footer %}>
     <div>
-    <p class="text-center text-muted">2022 Southern Colour Print</p>
+    <p class="text-center text-muted">2022 Brebner Print</p>
     </div>
 </footer>
 </html>

@@ -386,7 +386,7 @@ def status(job_id):
 @app.route("/status_update")
 @login_required
 def status_update():
-    if auth(user=current_user.id, action="created status update", job='', name='') >= 4:
+    if auth(user=current_user.id, action="accessed status update", job='', name='') >= 4:
         stamp_jobs = Jobs.query.order_by(Jobs.due_date).filter(Jobs.scheduled == 1, Jobs.completed == False)
         return render_template("status_update.html",
                                all_jobs=stamp_jobs,

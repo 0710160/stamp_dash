@@ -327,18 +327,10 @@ DASHBOARD
   background-color: rgba(255, 255, 255, 0.5);
 }
 
-.float-button {
-  position: sticky;
-  right: -77px;
-  top: 270px;
-  transition: all 0.2s ease-in 0s;
-  z-index: 9999;
-  cursor: pointer;
-}
-
-.float-button:hover {
-  right: -7px;
-}
+.status_img {
+    object-fit: contain;
+    height: max(45px);
+  }
 
 /*-----------------------------------------------------------------
 ANIMATIONS
