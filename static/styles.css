@@ -328,8 +328,7 @@ DASHBOARD
 }
 
 .status_img {
-    object-fit: contain;
-    height: max(45px);
+    height: 50px;
   }
 
 /*-----------------------------------------------------------------
