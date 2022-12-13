@@ -28,12 +28,16 @@
         {% if job.status.startswith('Dispatched') %}
         {% else %}
         <tr>
-            <td><img src="/static/uploads/{{ job.img_name }}" class="status_img"></td>
-            <td data-keywords="{{ job.job_name }}">{{ job.job_name }} </td>
-            <td>{{ job.status}} </td>
-            <td>{{ job.due_date | datefilter }}</td>
-            <td>{{ job.notes }}</td>
-        </tr>
+          <td><img src="/static/uploads/{{ job.img_name }}" class="status_img"></td>
+          <td data-keywords="{{ job.job_name }}">{{ job.job_name }} </td>
+          <td>{{ job.status}} </td>
+          <td>{{ job.due_date | datefilter }}</td>
+          {% if job.notes == None %}
+          <td></td>
+          {% else %}
+          <td>{{ job.notes }}</td>
+          {% endif %}
+      </tr>
         {% endif %}
         {% endfor %}
       </table>
