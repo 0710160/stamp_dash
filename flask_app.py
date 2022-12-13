@@ -61,7 +61,7 @@ class Jobs(db.Model):
     status = db.Column(db.String)
     notes = db.Column(db.String)
     img_name = db.Column(db.String(250))
-    is_stamp = db.Column(db.Boolean, default=False)  #unused
+    quantity = db.Column(db.Integer) 
     logs = relationship("Log", back_populates="jobs")
 
 
