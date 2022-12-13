@@ -27,6 +27,7 @@
         </a>
         <hr>
         <h4>Value: ${{ i.job_value }}</h4>
+        <h4>Quantity: {{ i.quantity }}</h4>
         <h4>Due date: {{ i.due_date | datefilter }}</h4>
         {% if i.status.startswith('Dispatched') %}
         <a href="/status/{{ i.id }}" onclick="return confirm('Are you sure you want to remove this delivered job?')">
