@@ -1,16 +1,19 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import desc, ForeignKey
-from sqlalchemy.orm import relationship
-from datetime import datetime, timedelta
-from werkzeug.security import generate_password_hash, check_password_hash
-from werkzeug.exceptions import HTTPException
-from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from telegram_bot import TelegramBot
-from dotenv import load_dotenv
-from pathlib import Path
-from flask_mail import Mail, Message
 import os
+from datetime import datetime, timedelta
+from pathlib import Path
+
+from dotenv import load_dotenv
+from flask import Flask, flash, redirect, render_template, request, url_for
+from flask_login import (LoginManager, UserMixin, current_user, login_required,
+                         login_user, logout_user)
+from flask_mail import Mail, Message
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import ForeignKey, desc
+from sqlalchemy.orm import relationship
+from werkzeug.exceptions import HTTPException
+from werkzeug.security import check_password_hash, generate_password_hash
+
+from telegram_bot import TelegramBot
 
 load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY')
@@ -237,6 +240,7 @@ def add_job(job_id):
         else:
             job_no = request.form["job_no"]
             job_value = request.form["job_value"]
+            job_qty = request.form["job_qty"]
             due_date = (request.form["due_date"])
             due_date = datetime.strptime(due_date, "%Y-%m-%d")
             notes = request.form["notes"]
@@ -247,6 +251,7 @@ def add_job(job_id):
             status = f'Entered {current_date}'
             new_job.job_no=job_no
             new_job.job_value=job_value
+            new_job.quantity=job_qty
             new_job.due_date=due_date
             new_job.notes=notes
             new_job.scheduled=1
@@ -307,7 +312,13 @@ def edit(job_id):
             else:
                 job_value = request.form["new_value"]
                 auth(user=current_user.id, action="edited value on job", job=edit_job.job_no, name=edit_job.job_name)
-                edit_job.job_value = job_value
+                edit_job.job_value = job_value           
+            if request.form["new_qty"] == "":
+                pass
+            else:
+                job_qty = request.form["new_qty"]
+                auth(user=current_user.id, action="edited quantity on job", job=edit_job.job_no, name=edit_job.job_name)
+                edit_job.job_qty = job_qty
             if request.form['status'] == "curr":
                 pass
             elif request.form['status'] == "proof":
