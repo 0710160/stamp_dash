@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block heading%}Administration Page{% endblock heading %}
+{% block status_update_active%}active{% endblock status_update_active %}
+{% block content %}
+
+<div class="container-fluid">
+
+    <div class="wrapper">
+        <div class="container-flex">
+            <div class="row">
+                <div class="col-10">
+                    <h3>Stamp Job Status</h3>
+                </div>
+                <div class="col-2">
+                    <input type="text" placeholder="Filter jobs" id="jobInput" onkeyup="jobFunction()">
+                </div>
+            </div>
+        </div>
+        <table id="jobTable" class="table status_table">
+            <tr class="header">
+                <th scope="col"></th>
+                <th scope="col">Job name</th>
+                <th scope="col">Status</th>
+                <th scope="col">Due date</th>
+                <th scope="col">Quantity</th>
+                <th scope="col">Notes</th>
+            </tr>
+            {% for job in all_jobs %}
+            {% if job.status.startswith('Dispatched') %}
+            {% else %}
+            <tr>
+                <td><img src="/static/uploads/{{ job.img_name }}" class="status_img"></td>
+                <td data-keywords="{{ job.job_name }}">{{ job.job_name }} </td>
+                <td>{{ job.status}} </td>
+                <td>{{ job.due_date | datefilter }}</td>
+		        <td>{{ job.quantity }}</td>
+                {% if job.notes == None %}
+                <td></td>
+                {% else %}
+                <td>{{ job.notes }}</td>
+                {% endif %}
+            </tr>
+            {% endif %}
+            {% endfor %}
+        </table>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script>
+        function jobFunction() {
+            // Declare variables
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById("jobInput");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("jobTable");
+            tr = table.getElementsByTagName("tr");
+
+            // Loop through all table rows, and hide those who don't match the search query
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td")[1];
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+    </script>
+    {% endblock %}

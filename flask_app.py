@@ -18,6 +18,8 @@ from telegram_bot import TelegramBot
 load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY')
 APP_PASSWORD = os.getenv('APP_PASSWORD')
+MY_EMAIL = os.getenv('MY_EMAIL')
+STAMP_EMAIL = os.getenv('STAMP_EMAIL')
 
 # UPLOAD_FOLDER = 'static/uploads/'
 UPLOAD_FOLDER = '/home/0710160/mysite/static/uploads'
@@ -39,7 +41,7 @@ login_manager.init_app(app)
 # Flask Mail manager
 app.config['MAIL_SERVER']='smtp.fastmail.com'
 app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = 'mtobin@fastmail.fm'
+app.config['MAIL_USERNAME'] = MY_EMAIL
 app.config['MAIL_PASSWORD'] = APP_PASSWORD
 app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
@@ -66,6 +68,7 @@ class Jobs(db.Model):
     img_name = db.Column(db.String(250))
     quantity = db.Column(db.Integer) 
     logs = relationship("Log", back_populates="jobs")
+    materials = db.Column(db.String) # format 000; 0=cartons, 1=outwork, 2=unused
 
 
 class User(UserMixin, db.Model):
@@ -118,9 +121,9 @@ def auth(user, action, job, name):
 
 
 def mail_manager(recipients, body):
-    msg = Message('Notification from Stamp Production Viewer', sender='stamps@sent.com', recipients=recipients)
+    msg = Message('Notification from Stamp Production Viewer', sender=STAMP_EMAIL, recipients=recipients)
     for recipient in recipients:
-        full_body = body + f'\n\nThis message was sent automatically from http://www.jobslist.scolour.co.nz/ To opt out of future emails, reply to this email with UNSUBSCRIBE as the subject.'
+        full_body = body + f'\n\nThis message was sent automatically from https://www.jobslist.scolour.co.nz/ To opt out of future emails, reply to this email with UNSUBSCRIBE as the subject.'
         msg.body=full_body
         mail.send(msg)
     return "Sent"
@@ -155,7 +158,7 @@ app.jinja_env.filters['datefilter'] = datefilter
 @login_required
 def home():
     if auth(user=current_user.id, action="accessed dashboard", job='', name='') >= 1:
-        stamp_jobs = Jobs.query.order_by(Jobs.due_date).filter(Jobs.scheduled == 1, Jobs.completed == False)
+        stamp_jobs = Jobs.query.order_by(Jobs.due_date, Jobs.job_name).filter(Jobs.scheduled == 1, Jobs.completed == False)
         outstanding_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.status == "submitted")
         to_do_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.status == "todo")
         return render_template("dashboard.html",
@@ -236,6 +239,8 @@ def add_job(job_id):
         if request.method == "GET":
             return render_template("add_job.html",
                 job_name=new_job.job_name,
+                materials=new_job.materials,
+                notes=new_job.notes,
                 logged_in=current_user.is_authenticated)
         else:
             job_no = request.form["job_no"]
@@ -244,6 +249,17 @@ def add_job(job_id):
             due_date = (request.form["due_date"])
             due_date = datetime.strptime(due_date, "%Y-%m-%d")
             notes = request.form["notes"]
+            materials = list("000")
+            try:
+                if request.form.getlist("cartons")[0]:
+                    materials[0] = '1'
+                elif request.form.getlist("outwork")[0]:
+                    materials[1] = '1'
+                elif request.form.getlist("other")[0]:
+                    materials[2] = '1' 
+            except IndexError:
+                pass
+            new_job.materials = "".join(materials)
             filename = f'job{job_no}'
             blank_img = open(os.path.join(app.config['UPLOAD_FOLDER'], filename), "w")
             blank_img.close()
@@ -313,6 +329,17 @@ def edit(job_id):
                 job_value = request.form["new_value"]
                 auth(user=current_user.id, action="edited value on job", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.job_value = job_value           
+            materials = list("000")
+            try:
+                if request.form.getlist("cartons")[0]:
+                    materials[0] = '1' 
+                elif request.form.getlist("outwork")[0]:
+                    materials[1] = '1' 
+                elif request.form.getlist("other")[0]:
+                    materials[2] = '1' 
+            except IndexError:
+                pass
+            edit_job.materials = "".join(materials)
             if request.form["new_qty"] == "":
                 pass
             else:
@@ -403,7 +430,7 @@ def status_update():
                                all_jobs=stamp_jobs,
                                logged_in=current_user.is_authenticated)
     else:
-        flash(f"You are not authorized to perform this action.")
+        flash("You are not authorized to perform this action.")
         return redirect(url_for('home'))
 
 
@@ -502,7 +529,7 @@ def new_user():
             db.session.commit()
             login_user(new_db_entry, remember=True)
             TelegramBot.send_text(
-                f"New user {name} created.\nGo to http://www.jobslist.scolour.co.nz/admin to approve.")
+                f"New user {name} created.\nGo to https://www.jobslist.scolour.co.nz/admin to approve.")
             flash("Request sent to administrator for approval.")
             return redirect(url_for('login'))
 
