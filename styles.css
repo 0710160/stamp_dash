@@ -1,0 +1,414 @@
+:root {
+  --heading-color: #334257;
+  --a-color: #548CA8;
+  --bg-color: #FFF;
+  --text-color: #334257;
+  }
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--bg-color);
+  height: 100%;
+  }
+
+#dashboard {
+  background-image: url(gradienta.png);
+  background-size: cover;
+  background-repeat: repeat-y;
+  z-index: -1;
+}
+
+footer {
+  height: 50px;
+  width: 100%;
+}
+
+h1 {
+  font-weight: 700;
+  font-size: 1.5em;
+  margin-top: 6px;
+  /*color: #06038D;*/
+  color: rgba(0,0,0,0);
+  }
+
+h2 {
+  font-size: 1.2em;
+  color: var(--heading-color);
+  }
+
+h4 {
+  margin-top: 10px;
+  font-size: 1.1em;
+  color: var(--text-color);
+  }
+
+a {
+  font-size: 1.1em;
+  color: var(--a-color);
+}
+
+p {
+  font-size: 1.1em;
+  color: var(--text-color);
+  padding: 0;
+  }
+
+.navbar {
+  height: 100px;
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 0 25px;
+}
+#logo {
+  margin-right: 25px;
+}
+
+th {
+  font-size: 1.1em;
+  color: var(--heading-color);
+  }
+
+thead th {
+  background-color: #fff;
+  position: sticky;
+  top: 0;
+}
+
+.job-rtg {
+  background: rgba(47, 213, 214, 0.2);
+  }
+
+label {
+  color: #fff
+  }
+
+.wrapper {
+  min-height: calc(100vh - 100px - 50px); /*.navbar, footer*/
+}
+
+.notes {
+  font-style: italic;
+  color: var(--a-color);
+  margin-top: -10px;
+  }
+
+.buttons {
+  margin-top: 10px;
+  width: 150px;
+  display: inline-block;
+  }
+
+.index-page .add-new {
+  background: #C927D0;
+  background: -webkit-linear-gradient(bottom right, #C927D0, #2ED5D6);
+  background: -moz-linear-gradient(bottom right, #C927D0, #2ED5D6);
+  background: linear-gradient(to top left, #C927D0, #2ED5D6);
+  color: #fff;
+}
+
+.add-new {
+  background: rgba(22, 82, 103, 100);
+  color: rgba(255, 201, 62, 100);
+}
+
+table .buttons {
+  margin-top: 0;
+  }
+
+.flashes {
+  color: rgba(255, 201, 62, 100);
+  }
+
+
+/*-------------------------------------------------------------------------------------
+FLASK FORMS WITH GRADIENT BOX
+-------------------------------------------------------------------------------------*/
+.form-container {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+          padding: 50px 0;
+}
+
+.custom-card {
+  position: relative;
+  max-width: 300px;
+  height: auto;
+  border-radius: 15px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  -webkit-box-shadow: 0 10px 15px rgba(0,0,0,.1);
+          box-shadow: 0 10px 15px rgba(0,0,0,.1);
+  -webkit-transition: .5s;
+  transition: .5s;
+  background: #C927D0;
+  background: -webkit-linear-gradient(bottom right, #C927D0, #2ED5D6);
+  background: -moz-linear-gradient(bottom right, #C927D0, #2ED5D6);
+  background: linear-gradient(to top left, #C927D0, #2ED5D6);
+}
+
+.custom-card-wide {
+  max-width: 500px;
+  }
+
+.fa:hover{
+  -webkit-transform: scale(1.2);
+          transform: scale(1.2);
+}
+
+.custom-card::before{
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 40%;
+  background: rgba(255, 255, 255, .1);
+  z-index: 1;
+  -webkit-transform: skewY(-5deg) scale(1.5);
+        transform: skewY(-5deg) scale(1.5);
+}
+
+.title .fa{
+  color:#fff;
+  font-size: 60px;
+  width: 100px;
+  height: 100px;
+  border-radius:  50%;
+  text-align: center;
+  line-height: 100px;
+  -webkit-box-shadow: 0 10px 10px rgba(0,0,0,.1) ;
+          box-shadow: 0 10px 10px rgba(0,0,0,.1) ;
+}
+
+.title h2 {
+  position: relative;
+  margin: 20px;
+  padding: 0;
+  color: #fff;
+  font-size: 28px;
+ z-index: 2;
+}
+
+.title h4 {
+  margin-top: 20px;
+  color: #fff;
+  font-size: 0.8em;
+  }
+
+.card_form h4 {
+  margin: 5px;
+}
+
+.form-action {
+  position: relative;
+  z-index: 2;
+}
+
+.form-action ul {
+  margin: 0;
+  padding: 0;
+
+}
+
+/*.form-action ul li {*/
+ul li {
+    margin: 0 0 10px;
+    padding: 0;
+    list-style: none;
+    color: #fff;
+    font-size: 16px;
+}
+
+.admin-page li {
+  color: #000;
+}
+
+.form-action buttons {
+  width: 200px;
+  }
+
+.form-action input {
+    width: 200px;
+    margin: 5px;
+  }
+
+.custom-card-wide input, textarea {
+  width: 300px;
+  }
+
+/*-----------------------------------------------------------------
+DASHBOARD
+-----------------------------------------------------------------*/
+.job-card {
+  width: 275px;
+}
+
+.job-card h4 {
+  margin-top: 0;
+  line-height: 1.1;
+}
+
+.job-card p {
+  margin-top: 0.8rem;
+}
+
+.quote-card,.card {
+  background-color: rgba(255, 255, 255, 0.8);
+  margin: 0.75vw;
+  border-radius: 10px;
+  border: none;
+}
+
+.approved {
+  background-color: rgba(235, 255, 235, 0.8);
+}
+
+.quote-card {
+  padding: 2% 0;
+}
+
+.quote-card col {
+  vertical-align: middle;
+}
+
+.quote-card,.card h4 {
+  color: var(--text-color);
+}
+
+.card h3 {
+  font-size: 1.1em;
+  }
+
+.aspect-box {
+  aspect-ratio: 1.667;
+}
+
+.card .job_img {
+  /*width: 260px;
+  height: 100px;
+  background-repeat: no-repeat;
+  background-position: center;*/
+  object-fit: contain;
+  height: min(180px, 100%);
+  width: min(275px, 100%);
+  border-radius: 10px 10px 0 0;
+}
+
+.card .job_name {
+  height: 50px;
+}
+
+.card hr {
+  margin-top: 0.5rem;
+}
+
+.card .img_placeholder {
+  position: relative;
+  left: 25%;
+}
+
+.details {
+  padding: 10px;
+  font-size: 80%;
+}
+
+.header_img {
+  height: 180px;
+  border-radius: 10px 10px 0 0;
+}
+
+.won,.lost {
+  margin: 0 3px;
+}
+
+.quote-big-box ul {
+  margin-left: -4%;
+}
+
+.status_table td {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.status_img {
+  max-width: 84px;
+  max-height: 50px;
+}
+
+.material-check {
+  font-size: 1.8rem;
+  position: absolute;
+  left: 230px;
+  top: 250px;
+}
+
+.material-hide {
+  display: none;
+  position: absolute;
+  top: 250px;
+  border-radius: 6px;
+  color: #fff;
+  background-color: #555;
+}
+
+.material-hide p {
+    color: #fff;
+    margin: 8px;
+}
+
+.material-div:hover + .material-hide {
+  display: block;
+}
+
+/*-----------------------------------------------------------------
+ANIMATIONS
+-----------------------------------------------------------------*/
+.animate-pop-in {
+    animation: pop-in .6s ease-out forwards;
+    }
+
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-4rem) scale(0.8);
+    }
+  100% {
+    opacity: 1;
+    transform: none;
+    }
+  }
+
+
+/*-----------------------------------------------------------------
+MEDIA QUERIES
+-----------------------------------------------------------------
+@media only screen and (max-width:1300px) {
+    .buttons {
+        width: 120px;
+        font-size: 0.9em
+    }
+
+    h1 {
+        font-size: 1.2em;
+    }
+
+    h2 {
+        font-size: 1.0em;
+    }
+
+    h4,a,p,th {
+        font-size: 0.9em;
+    }
+}*/
+
+@media only screen and (max-width: 600px) {
+  .mobile-hidden {
+    display: none;
+  }
+}
