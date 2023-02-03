@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block heading%}Administration Page{% endblock heading %}
+{% block admin_active%}active{% endblock admin_active %}
+{% block content %}
+
+<div class="container-fluid">
+
+  <h2 class="heading">Admin: Edit User</h2>
+  <hr>
+  <div class="row">
+    <div class="col-lg-6 col-sm-12">
+      <form action="" method="POST">
+        <label style="color:black;">User name:</label>
+        <input type="text" , style="width:100px;" , name="name"><br>
+        <label style="color:black;">Access rights:</label>
+        <input type="text" , style="width:50px;" , name="rights"><br>
+        <label style="color:black;">New password:</label>
+        <input type="password" , style="width:100px;" , name="password"><br>
+        <br>
+        <button class="btn btn-dark buttons" type="submit">Edit User</button>
+        <a class="btn btn-secondary buttons" href="{{ url_for('home') }}">Return Home</a>
+      </form>
+    </div>
+    <div class="col-lg-3 col-sm-12 admin-page">
+      <h2>User Rights Levels:</h2>
+      <ul>
+        <li>5 = Admin (all rights)</li>
+        <li>4 = Edit quotes & jobs</li>
+        <li>3 = Add quotes & job</li>
+        <li>2 = Unused</li>
+        <li>1 = Read Only</li>
+        <li>0 = Account Only</li>
+      </ul>
+    </div>
+    <div class="col-lg-3 col-sm-12 admin-page user-list">
+      <h2>Current User List:</h2>
+      <ul>
+        {% for user in users: %}
+        <li>{{ user.name }}: {{ user.rights }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  </hr></br>
+
+<div class="logs row">
+    <div class="container col-6">
+    <h3>User Action Log</h3>
+      <table id="logTable" class="table">
+        <tr class="header">
+          <th scope="col"><input type="text" placeholder="Filter log" id="logInput" onkeyup="logFunction()"></th>
+        </tr>
+        {% for log in all_logs %}
+        <tr>
+            <td data-keywords="{{ log.action }}">{{ log.timestamp}} - {{ log.action }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+
+    <div class="container col-6">
+    <h3>Timesheet Log</h3>
+      <table id="timesheetTable" class="table">
+        <tr class="header">
+          <th scope="col"><input type="text" placeholder="Filter timesheets" id="timesheetInput" onkeyup="timesheetFunction()"></th>
+        </tr>
+        {% for t in timesheets %}
+        <tr>
+            <td data-keywords="{{ t.job_no}}">{{ t.job_no }}: {{ t.user }} {{ t.length }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+</div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+  <script>
+    function logFunction() {
+      // Declare variables
+      var input, filter, table, tr, td, i, txtValue;
+      input = document.getElementById("logInput");
+      filter = input.value.toUpperCase();
+      table = document.getElementById("logTable");
+      tr = table.getElementsByTagName("tr");
+
+      // Loop through all table rows, and hide those who don't match the search query
+      for (i = 0; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName("td")[0];
+        if (td) {
+          txtValue = td.textContent || td.innerText;
+          if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+          } else {
+            tr[i].style.display = "none";
+          }
+        }
+      }
+    }
+  </script>
+  {% endblock %}

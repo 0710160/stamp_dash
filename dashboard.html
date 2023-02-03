@@ -31,16 +31,24 @@
             <i class="material-check bi bi-check-circle" style="color:limegreen;"></i>
           </div>
           <div class="material-hide">
-            <p>Materials have been ordered.</p>
+            <p>Materials have been ordered</p>
           </div>
           {% else %}
           <div class="material-div">
             <i class="material-check bi bi-circle" style="color:orangered;"></i>
           </div>
           <div class="material-hide">
-            <p>Materials have not been ordered.</p>
+            <p>Materials have not been ordered</p>
           </div>
         {% endif %}
+        <div class="timesheet-div">
+            <a href="/timesheet-job/{{ i.id }}">
+                <i class="timesheet bi bi-clock"></i>
+            </a>
+        </div>
+        <div class="timesheet-hide">
+            <p>Post timesheet</p>
+        </div>
         <h4>Value: ${{ i.job_value }}</h4>
         <h4>Quantity: {{ i.quantity }}</h4>
         <h4>Due date: {{ i.due_date | datefilter }}</h4>
@@ -153,4 +161,6 @@
       }
     }
   </script>
+
+
   {% endblock %}
