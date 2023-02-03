@@ -1,24 +1,24 @@
 {% extends "base.html" %}
-{% block heading %}Stamp Job Dashboard{% endblock heading %}
+{% block heading %}{% endblock heading %}
 {% block home_active%}active{% endblock home_active %}
-{% block hide_footer %}hidden{% endblock hide_footer %}
+{% block hide_footer %}{% endblock hide_footer %}
 {% block content %}
 
-
-<div class="container-fluid full-bg">
+<body id="dashboard">
+<div class="wrapper">
   <div class="d-flex flex-wrap">
     {% for i in all_jobs %}
     <div class="card job-card
     {% if i.status.startswith('Proof') %} approved
     {% elif i.status.startswith('Dispatched') %} dispatched
     {% endif %}">
-    {% if i.completed == False %}
+      {% if i.completed == False %}
       <div class="title header_img aspect-box">
         <a href="/image_handler/{{ i.id }}">
           <img src="/static/uploads/{{ i.img_name }}" class="job_img">
         </a>
       </div>
-    {% endif %}
+      {% endif %}
       <div class="details">
         <a href="/edit/{{ i.id }}"><!--target="_blank"-->
           <div class="job_name">
@@ -26,35 +26,52 @@
           </div>
         </a>
         <hr>
+        {% if i.materials.startswith('11') %}
+          <div class="material-div">
+            <i class="material-check bi bi-check-circle" style="color:limegreen;"></i>
+          </div>
+          <div class="material-hide">
+            <p>Materials have been ordered.</p>
+          </div>
+          {% else %}
+          <div class="material-div">
+            <i class="material-check bi bi-circle" style="color:orangered;"></i>
+          </div>
+          <div class="material-hide">
+            <p>Materials have not been ordered.</p>
+          </div>
+        {% endif %}
         <h4>Value: ${{ i.job_value }}</h4>
         <h4>Quantity: {{ i.quantity }}</h4>
         <h4>Due date: {{ i.due_date | datefilter }}</h4>
         {% if i.status.startswith('Dispatched') %}
         <a href="/status/{{ i.id }}" onclick="return confirm('Are you sure you want to remove this delivered job?')">
           {% else %}
-        <a href="/status/{{ i.id }}">
+          <a href="/status/{{ i.id }}">
+            {% endif %}
+            {{ i.status }}
+          </a><br>
+          {% if all == False %}
+          {% if i.notes %}
+          <h4>Notes: {{ i.notes }}</h4>
           {% endif %}
-          {{ i.status }}
-        </a><br>
-        {% if all == False %}
-        {% if i.notes %}
-        <h4>Notes: {{ i.notes }}</h4>
-        {% endif %}
-        {% endif %}
+          {% endif %}
       </div>
     </div>
     {% endfor %}
   </div>
 
-  <div class="quote-card row mobile-hidden">
+  <div id="quotes" class="quote-card row mobile-hidden">
     <div class="container-flex quote-big-box col">
       <table class="table">
         <tr class="header">
-          <th scope="col"><h3>Quotes To-Do List</h3></th>
+          <th scope="col">
+            <h3>Quotes To-Do List</h3>
+          </th>
           <th scope="col">Due Date</th>
           <th scope="col"><a class="btn btn-light add-quote" href="/add_quote">Add new quote</a></th>
         </tr>
-          {% for t in to_do_quotes %}
+        {% for t in to_do_quotes %}
         <tr>
           <td>
             <a href="/edit/{{ t.id }}">{{ t.job_name }}</a>
@@ -72,14 +89,16 @@
               </div>
           </td>
         </tr>
-          {% endfor %}
+        {% endfor %}
       </table>
     </div>
 
     <div class="container-flex quote-big-box col">
       <table id="myTable" class="table">
         <tr class="header">
-          <th scope="col"><h3>Outstanding Quotes</h3></th>
+          <th scope="col">
+            <h3>Outstanding Quotes</h3>
+          </th>
           <th scope="col">Completed</th>
           <th scope="col"><input type="text" placeholder="Filter quotes" id="myInput" onkeyup="myFunction()"></th>
         </tr>
@@ -106,10 +125,8 @@
     </div>
 
   </div>
-
-  <div class="float-button">
-    <a class="btn btn-light" href="/status_update">Status update</a>
-  </div>
+</div>
+</body>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
@@ -136,5 +153,4 @@
       }
     }
   </script>
-
   {% endblock %}

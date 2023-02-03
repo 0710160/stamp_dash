@@ -18,7 +18,15 @@ body {
   height: 100%;
   }
 
+#dashboard {
+  background-image: url(gradienta.png);
+  background-size: cover;
+  background-repeat: repeat-y;
+  z-index: -1;
+}
+
 footer {
+  height: 50px;
   width: 100%;
 }
 
@@ -53,7 +61,12 @@ p {
   }
 
 .navbar {
+  height: 100px;
   background-color: rgba(255, 255, 255, 0.5);
+  padding: 0 25px;
+}
+#logo {
+  margin-right: 25px;
 }
 
 th {
@@ -75,10 +88,9 @@ label {
   color: #fff
   }
 
-.container-fluid {
-  min-height: 88vh;
-  padding: 15px;
-    }
+.wrapper {
+  min-height: calc(100vh - 100px - 50px); /*.navbar, footer*/
+}
 
 .notes {
   font-style: italic;
@@ -100,7 +112,7 @@ label {
   color: #fff;
 }
 
-.full-bg .add-new {
+.add-new {
   background: rgba(22, 82, 103, 100);
   color: rgba(255, 201, 62, 100);
 }
@@ -233,17 +245,17 @@ ul li {
 /*-----------------------------------------------------------------
 DASHBOARD
 -----------------------------------------------------------------*/
-.full-bg {
-  position: absolute;
-  background-image: url(gradienta.png);
-  background-size: cover;
-  background-repeat: repeat-y;
-  padding: 7% 1%;
-  z-index: -1;
-}
-
 .job-card {
   width: 275px;
+}
+
+.job-card h4 {
+  margin-top: 0;
+  line-height: 1.1;
+}
+
+.job-card p {
+  margin-top: 0.8rem;
 }
 
 .quote-card,.card {
@@ -255,10 +267,6 @@ DASHBOARD
 
 .approved {
   background-color: rgba(235, 255, 235, 0.8);
-}
-
-.late {
-  background-color: rgba(255, 114, 118, 0.8);
 }
 
 .quote-card {
@@ -287,8 +295,8 @@ DASHBOARD
   background-repeat: no-repeat;
   background-position: center;*/
   object-fit: contain;
-  height: max(180px, 100%);
-  width: max(275px, 100%);
+  height: min(180px, 100%);
+  width: min(275px, 100%);
   border-radius: 10px 10px 0 0;
 }
 
@@ -323,13 +331,40 @@ DASHBOARD
   margin-left: -4%;
 }
 
-.table-div {
-  background-color: rgba(255, 255, 255, 0.5);
+.status_table td {
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 
 .status_img {
-    height: 50px;
-  }
+  max-width: 84px;
+  max-height: 50px;
+}
+
+.material-check {
+  font-size: 1.8rem;
+  position: absolute;
+  left: 230px;
+  top: 250px;
+}
+
+.material-hide {
+  display: none;
+  position: absolute;
+  top: 250px;
+  border-radius: 6px;
+  color: #fff;
+  background-color: #555;
+}
+
+.material-hide p {
+    color: #fff;
+    margin: 8px;
+}
+
+.material-div:hover + .material-hide {
+  display: block;
+}
 
 /*-----------------------------------------------------------------
 ANIMATIONS
@@ -373,10 +408,6 @@ MEDIA QUERIES
 }*/
 
 @media only screen and (max-width: 600px) {
-  .full-bg {
-    background-size: contain;
-  }
-
   .mobile-hidden {
     display: none;
   }

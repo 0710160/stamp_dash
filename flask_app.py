@@ -66,7 +66,7 @@ class Jobs(db.Model):
     status = db.Column(db.String)
     notes = db.Column(db.String)
     img_name = db.Column(db.String(250))
-    quantity = db.Column(db.Integer) 
+    quantity = db.Column(db.Integer)
     logs = relationship("Log", back_populates="jobs")
     materials = db.Column(db.String) # format 000; 0=cartons, 1=outwork, 2=unused
 
@@ -78,6 +78,7 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(250))
     password = db.Column(db.String(100))
     rights = db.Column(db.Integer, default=0)  # 0 is no access, 1 is read-only, 5 is admin
+    active_job = db.Column(db.String(100))
     #email_preferences = db.Column(db.String)
 
 
@@ -89,6 +90,15 @@ class Log(db.Model):
     action = db.Column(db.String(100))
     job_no = db.Column(db.String, ForeignKey("jobs.job_no"))
     jobs = relationship("Jobs", back_populates="logs")
+
+
+class Timesheet(db.Model):
+    ''' DB for user timesheets '''
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime)
+    user = db.Column(db.String(100))
+    job_no = db.Column(db.String)
+    length = db.Column(db.Float, default=0)
 
 
 #db.create_all()
@@ -253,10 +263,10 @@ def add_job(job_id):
             try:
                 if request.form.getlist("cartons")[0]:
                     materials[0] = '1'
-                elif request.form.getlist("outwork")[0]:
+                if request.form.getlist("outwork")[0]:
                     materials[1] = '1'
-                elif request.form.getlist("other")[0]:
-                    materials[2] = '1' 
+                if request.form.getlist("other")[0]:
+                    materials[2] = '1'
             except IndexError:
                 pass
             new_job.materials = "".join(materials)
@@ -328,15 +338,15 @@ def edit(job_id):
             else:
                 job_value = request.form["new_value"]
                 auth(user=current_user.id, action="edited value on job", job=edit_job.job_no, name=edit_job.job_name)
-                edit_job.job_value = job_value           
+                edit_job.job_value = job_value
             materials = list("000")
             try:
                 if request.form.getlist("cartons")[0]:
-                    materials[0] = '1' 
-                elif request.form.getlist("outwork")[0]:
-                    materials[1] = '1' 
-                elif request.form.getlist("other")[0]:
-                    materials[2] = '1' 
+                    materials[0] = '1'
+                if request.form.getlist("outwork")[0]:
+                    materials[1] = '1'
+                if request.form.getlist("other")[0]:
+                    materials[2] = '1'
             except IndexError:
                 pass
             edit_job.materials = "".join(materials)
@@ -432,6 +442,34 @@ def status_update():
     else:
         flash("You are not authorized to perform this action.")
         return redirect(url_for('home'))
+
+
+@app.route("/timesheet/<job_id>", methods=["GET", "POST"])
+@login_required
+def timesheet(job_id):
+    job = Jobs.query.get(job_id)
+    timesheet_users = User.query.filter(User.rights == 2)
+    if request.method == "GET":
+        return render_template('timesheet.html',
+                                job=job,
+                                users=timesheet_users,
+                                logged_in=current_user.is_authenticated)
+    else:
+        selected_users = request.form.getlist('select-users')
+        for u in selected_users:
+            ut = User.query.get(u)
+            if ut.active_job: #closes off active timesheet entry per user
+                timesheet_entry = Timesheet.query.filter_by(user=ut.id).first()
+                hours_spent = datetime.now() - timesheet_entry.timestamp
+                timesheet_entry.length = timesheet_entry.length + (hours_spent.total_seconds() / 3600)
+                db.session.commit()
+            timesheet_entry = Timesheet(user=ut.id,
+                                        timestamp=datetime.now(),
+                                        job_no=job.job_no)
+            db.session.add(timesheet_entry)
+            ut.active_job = job.job_no
+            db.session.commit()
+        return redirect(url_for('home', logged_in=current_user.is_authenticated))
 
 
 @app.route("/image_handler/<job_id>")
@@ -565,9 +603,11 @@ def admin():
         if request.method == "GET":
             all_logs = Log.query.order_by(desc(Log.timestamp)).all()
             all_users = User.query.all()
+            all_timesheets = Timesheet.query.all()
             return render_template("admin.html",
                                    all_logs=all_logs,
                                    users=all_users,
+                                   timesheets=all_timesheets,
                                    logged_in=current_user.is_authenticated)
         else:
             name = request.form["name"]
