@@ -7,7 +7,7 @@
 
 html {
   position: relative;
-  min-height: 100%;
+  height: 100%;
 }
 
 body {
@@ -18,13 +18,6 @@ body {
   height: 100%;
   }
 
-#dashboard {
-  background-image: url(gradienta.png);
-  background-size: cover;
-  background-repeat: repeat-y;
-  z-index: -1;
-}
-
 footer {
   height: 50px;
   width: 100%;
@@ -34,8 +27,8 @@ h1 {
   font-weight: 700;
   font-size: 1.5em;
   margin-top: 6px;
-  /*color: #06038D;*/
-  color: rgba(0,0,0,0);
+  color: #3369b2;
+  /*color: rgba(0,0,0,0);*/
   }
 
 h2 {
@@ -104,19 +97,6 @@ label {
   display: inline-block;
   }
 
-.index-page .add-new {
-  background: #C927D0;
-  background: -webkit-linear-gradient(bottom right, #C927D0, #2ED5D6);
-  background: -moz-linear-gradient(bottom right, #C927D0, #2ED5D6);
-  background: linear-gradient(to top left, #C927D0, #2ED5D6);
-  color: #fff;
-}
-
-.add-new {
-  background: rgba(22, 82, 103, 100);
-  color: rgba(255, 201, 62, 100);
-}
-
 table .buttons {
   margin-top: 0;
   }
@@ -124,6 +104,23 @@ table .buttons {
 .flashes {
   color: rgba(255, 201, 62, 100);
   }
+
+.bg {
+    width: 100vw;
+    min-height: 100vh;
+    /* Created with https://www.css-gradient.com */
+    background: #1F2F79;
+    background: -webkit-linear-gradient(right, #1F2F79, #336AB2);
+    background: -moz-linear-gradient(right, #1F2F79, #336AB2);
+    background: linear-gradient(to left, #1F2F79, #336AB2);
+}
+
+.bg .timesheet-bg {
+    /* Created with https://www.css-gradient.com */
+    background: conic-gradient(from 45deg, #1f2f79, #3369b2);
+    position: absolute;
+    z-index: -1;
+}
 
 
 /*-------------------------------------------------------------------------------------
@@ -227,6 +224,12 @@ ul li {
 
 .admin-page li {
   color: #000;
+}
+
+.user-list {
+  columns: 2;
+  -webkit-columns: 2;
+  -moz-columns: 2;
 }
 
 .form-action buttons {
@@ -352,6 +355,7 @@ DASHBOARD
   display: none;
   position: absolute;
   top: 250px;
+  right: 50px;
   border-radius: 6px;
   color: #fff;
   background-color: #555;
@@ -367,8 +371,114 @@ DASHBOARD
 }
 
 /*-----------------------------------------------------------------
+TIMESHEET PAGE
+-----------------------------------------------------------------*/
+
+.timesheet-page {
+    margin: 20vh 30vw;
+}
+
+#timesheet-notes {
+    width: -webkit-fill-available;
+}
+
+.timesheet {
+  font-size: 1.8rem;
+  position: absolute;
+  left: 230px;
+  top: 290px;
+  background: -webkit-linear-gradient(rgba(252,176,69,1), rgba(253,29,29,1));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.timesheet-hide {
+  display: none;
+  position: absolute;
+  top: 290px;
+  right: 50px;
+  border-radius: 6px;
+  color: #fff;
+  background-color: #555;
+}
+
+.timesheet-hide p {
+    color: #fff;
+    margin: 8px;
+}
+
+.timesheet-div:hover + .timesheet-hide {
+  display: block;
+}
+
+.timesheet-job-image {
+    max-width: 450px;
+}
+
+#timesheet-card {
+    padding: 30px;
+}
+
+.crash-img {
+    position: absolute;
+    right: 3vw;
+    bottom: 7vh;
+}
+
+
+/*-----------------------------------------------------------------
 ANIMATIONS
 -----------------------------------------------------------------*/
+/*material popup*/
+.popup {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.popup .popuptext {
+  visibility: hidden;
+  width: 180px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -80px;
+}
+
+.popup .popuptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+.popup .show {
+  visibility: visible;
+  -webkit-animation: fadeIn 1s;
+  animation: fadeIn 1s;
+}
+
+@-webkit-keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
+/*gradient box animation*/
 .animate-pop-in {
     animation: pop-in .6s ease-out forwards;
     }
