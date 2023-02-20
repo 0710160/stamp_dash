@@ -4,8 +4,9 @@
 {% block timesheet_active%}active{% endblock timesheet_active %}
 {% block content %}
 
-<div class="timesheet-page">
-    <h3>Clock off active job</h3>
+<div class="bg">
+<div class="card timesheet-page" id="timesheet-card">
+    <h1 class="heading">Clock off active job</h1>
     <div>
     <h4>Active jobs:</h4>
     {% for u in users %}
@@ -28,11 +29,11 @@
                 <input type="text", id="timesheet-notes", name="notes", placeholder="Add notes">
             </div>
             <div class="col-4">
-                <button class="btn btn-light" type="submit">Finish Job</button>
+                <button class="btn btn-light" type="submit">Clock off</button>
             </div>
-        <a class="btn btn-dark buttons" href="{{ url_for('home') }}">Return Home</a>
     </form>
     </div>
+</div>
 </div>
 
 {% endblock %}
