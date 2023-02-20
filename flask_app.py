@@ -2,13 +2,14 @@ import os
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from decimal import Decimal
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request, url_for
 from flask_login import (LoginManager, UserMixin, current_user, login_required,
                          login_user, logout_user)
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import ForeignKey, desc
+from sqlalchemy import ForeignKey, desc, func
 from sqlalchemy.orm import relationship
 from werkzeug.exceptions import HTTPException
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -298,6 +299,8 @@ def add_job(job_id):
 def edit(job_id):
     edit_job = Jobs.query.get(job_id)
     logs = Log.query.filter_by(job_no=edit_job.job_no).all()
+    timesheet = Timesheet.query.filter_by(job_no=edit_job.job_no).all()
+    hours = Timesheet.query.with_entities(func.sum(Timesheet.length)).filter_by(job_no=edit_job.job_no).first()
     if auth_user_min(user=current_user.id) >= 4:
         if request.method == "GET":
             filename = Path(os.path.join(app.config['UPLOAD_FOLDER'], edit_job.img_name))
@@ -309,6 +312,8 @@ def edit(job_id):
                                    file_exists=file_exists,
                                    job=edit_job,
                                    log=logs,
+                                   hours=hours,
+                                   timesheet=timesheet,
                                    logged_in=current_user.is_authenticated)
         else:
             current_date = time_adjusted()
@@ -444,30 +449,58 @@ def status_update():
         return redirect(url_for('home'))
 
 
-@app.route("/timesheet/<job_id>", methods=["GET", "POST"])
+@app.route("/timesheet-clock", methods=["GET", "POST"])
 @login_required
-def timesheet(job_id):
-    job = Jobs.query.get(job_id)
-    timesheet_users = User.query.filter(User.rights == 2)
+def timesheetclock():
+    timesheet_users = User.query.filter(User.rights.in_([2,5]))
     if request.method == "GET":
-        return render_template('timesheet.html',
+        return render_template('timesheet-clock.html',
+                                users=timesheet_users,
+                                logged_in=current_user.is_authenticated)
+    else:
+        selected_users = request.form.getlist('select-users')
+        for u in selected_users:
+            uq = User.query.get(u)
+            try:
+                if uq.active_job: #closes off active timesheet entry per user
+                    timesheet_entry = Timesheet.query.filter_by(user=uq.id).order_by(Timesheet.id.desc()).first()
+                    hours_spent = datetime.now() - timesheet_entry.timestamp
+                    timesheet_entry.length = round(Decimal(timesheet_entry.length + (hours_spent.total_seconds() / 3600)),2)
+                    TelegramBot.send_text(f'{uq.name} clocked off job {uq.active_job} at {datetime.now()} for a total of {hours_spent} hours.')
+                    uq.active_job = ""
+                    db.session.commit()
+            except:
+                pass
+        return redirect(url_for('home', logged_in=current_user.is_authenticated))
+
+
+@app.route("/timesheet-job/<job_id>", methods=["GET", "POST"])
+@login_required
+def timesheetjob(job_id):
+    job = Jobs.query.get(job_id)
+    timesheet_users = User.query.filter(User.rights.in_([2,5]))
+    if request.method == "GET":
+        return render_template('timesheet-job.html',
                                 job=job,
                                 users=timesheet_users,
                                 logged_in=current_user.is_authenticated)
     else:
         selected_users = request.form.getlist('select-users')
         for u in selected_users:
-            ut = User.query.get(u)
-            if ut.active_job: #closes off active timesheet entry per user
-                timesheet_entry = Timesheet.query.filter_by(user=ut.id).first()
+            uq = User.query.get(u)
+            if uq.active_job: #closes off active timesheet entry per user
+                timesheet_entry = Timesheet.query.filter_by(user=uq.id).order_by(Timesheet.id.desc()).first()
                 hours_spent = datetime.now() - timesheet_entry.timestamp
-                timesheet_entry.length = timesheet_entry.length + (hours_spent.total_seconds() / 3600)
+                timesheet_entry.length = round(Decimal(timesheet_entry.length + (hours_spent.total_seconds() / 3600)),2)
                 db.session.commit()
-            timesheet_entry = Timesheet(user=ut.id,
+                TelegramBot.send_text(f'{uq.name} clocked off job {job.job_no} at {datetime.now()} for a total of {hours_spent} hours.')
+            timesheet_entry = Timesheet(user=uq.id,
                                         timestamp=datetime.now(),
                                         job_no=job.job_no)
+            TelegramBot.send_text(f'{uq.name} started job {job.job_no} at {datetime.now()}')
+            TelegramBot.send_text(f'{datetime.now()} {timesheet_entry.timestamp}')
             db.session.add(timesheet_entry)
-            ut.active_job = job.job_no
+            uq.active_job = job.job_no
             db.session.commit()
         return redirect(url_for('home', logged_in=current_user.is_authenticated))
 
@@ -603,7 +636,7 @@ def admin():
         if request.method == "GET":
             all_logs = Log.query.order_by(desc(Log.timestamp)).all()
             all_users = User.query.all()
-            all_timesheets = Timesheet.query.all()
+            all_timesheets = Timesheet.query.order_by(Timesheet.id.desc()).all()
             return render_template("admin.html",
                                    all_logs=all_logs,
                                    users=all_users,
@@ -683,9 +716,8 @@ def auth_401(error):
 @app.errorhandler(500)
 def special_exception_handler(error):
     if isinstance(error, HTTPException):
-        error_debug = f'User {current_user.name} broke something. {error.code}: {error.name}'
-    TelegramBot.send_text(error_debug)
-    return f"Database error. A notification has been sent to the administrator.", 500
+        TelegramBot.send_text(f'User {current_user.name} broke something.')
+        return render_template("crash.html"), 500
 
 
 if __name__ == "__main__":
