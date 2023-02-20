@@ -4,8 +4,9 @@
 {% block timesheet_active%}active{% endblock timesheet_active %}
 {% block content %}
 
-<div class="timesheet-page">
-    <h3>Timesheet entry for {{ job.job_name }}</h3>
+<div class="bg timesheet-bg">
+<div class="card timesheet-page" id="timesheet-card">
+    <h1 class="heading">Timesheet entry for {{ job.job_name }}</h1>
     <h4>Select users (Command+Click to select multiple):</h4>
     <form action="" method="POST">
         <select class="form-select timesheet-select-users" multiple name="select-users">
@@ -20,8 +21,8 @@
             <div class="col-4">
                 <button class="btn btn-light" type="submit">Start Job {{ job.job_no }}</button>
             </div>
-        <a class="btn btn-dark buttons" href="{{ url_for('home') }}">Return Home</a>
     </form>
+</div>
 </div>
 
 {% endblock %}
