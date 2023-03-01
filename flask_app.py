@@ -172,10 +172,12 @@ def home():
         stamp_jobs = Jobs.query.order_by(Jobs.due_date, Jobs.job_name).filter(Jobs.scheduled == 1, Jobs.completed == False)
         outstanding_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.status == "submitted")
         to_do_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.status == "todo")
+        due_late_jobs = stamp_jobs.filter(Jobs.due_date < (datetime.now() + timedelta(hours=10)))
         return render_template("dashboard.html",
                                all_jobs=stamp_jobs,
                                outstanding_quotes=outstanding_quotes,
                                to_do_quotes=to_do_quotes,
+                               due_late_jobs=due_late_jobs,
                                all=False,
                                logged_in=current_user.is_authenticated)
     else:
@@ -329,8 +331,8 @@ def edit(job_id):
             elif request.form["notes"] == " ":
                 edit_job.notes = None
             else:
-                auth(user=current_user.id, action="edited notes on job", job=edit_job.job_no, name=edit_job.job_name)
                 notes = request.form["notes"]
+                auth(user=current_user.id, action=f"edited note: {notes} on job", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.notes = notes
             if request.form["new_name"] == "":
                 pass
