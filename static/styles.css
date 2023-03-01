@@ -3,6 +3,8 @@
   --a-color: #548CA8;
   --bg-color: #FFF;
   --text-color: #334257;
+  --bspg-light: #336AB2
+  --bspg-dark: #1F2F79
   }
 
 html {
@@ -56,8 +58,10 @@ p {
 .navbar {
   height: 100px;
   background-color: rgba(255, 255, 255, 0.5);
-  padding: 0 25px;
+  padding: 25px;
+  z-index: 3;
 }
+
 #logo {
   margin-right: 25px;
 }
@@ -83,6 +87,7 @@ label {
 
 .wrapper {
   min-height: calc(100vh - 100px - 50px); /*.navbar, footer*/
+  padding: 0 1vw;
 }
 
 .notes {
@@ -105,8 +110,11 @@ table .buttons {
   color: rgba(255, 201, 62, 100);
   }
 
+.brebner-logo {
+    margin-right: calc(100vw - 230px - 500px)!important;
+}
+
 .bg {
-    width: 100vw;
     min-height: 100vh;
     /* Created with https://www.css-gradient.com */
     background: #1F2F79;
@@ -115,11 +123,12 @@ table .buttons {
     background: linear-gradient(to left, #1F2F79, #336AB2);
 }
 
-.bg .timesheet-bg {
+.timesheet-bg {
+    position: absolute;
+    min-height: 100vh;
+    width: 100vw;
     /* Created with https://www.css-gradient.com */
     background: conic-gradient(from 45deg, #1f2f79, #3369b2);
-    position: absolute;
-    z-index: -1;
 }
 
 
@@ -222,6 +231,14 @@ ul li {
     font-size: 16px;
 }
 
+.admin-page {
+  border-radius: 12px;
+  border-style: solid;
+  border-width: thin;
+  padding: 8px;
+  margin: 6px;
+}
+
 .admin-page li {
   color: #000;
 }
@@ -263,9 +280,32 @@ DASHBOARD
 
 .quote-card,.card {
   background-color: rgba(255, 255, 255, 0.8);
-  margin: 0.75vw;
   border-radius: 10px;
   border: none;
+}
+
+@media only screen and (min-width: 1115px) and (max-width: 1324px) { /*3-across cards*/
+    .quote-card,.card {
+        margin: calc((97vw - 825px) / 12);
+    }
+}
+
+@media only screen and (min-width: 1325px) and (max-width: 1499px) { /*4-across cards*/
+    .quote-card,.card {
+        margin: calc((97vw - 1100px) / 12);
+    }
+}
+
+@media only screen and (min-width: 1500px) and (max-width: 1750px) { /*5-across cards*/
+    .quote-card,.card {
+        margin: calc((97vw - 1375px) / 12);
+    }
+}
+
+@media only screen and (min-width: 1751px) { /*6-across cards*/
+    .quote-card,.card {
+        margin: calc((97vw - 1650px) / 12);
+    }
 }
 
 .approved {
@@ -314,6 +354,13 @@ DASHBOARD
 .card .img_placeholder {
   position: relative;
   left: 25%;
+}
+
+div.scroll {
+  border-radius: 0;
+  height: 366px;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .details {
