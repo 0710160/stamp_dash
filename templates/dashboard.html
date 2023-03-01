@@ -4,10 +4,38 @@
 {% block hide_footer %}{% endblock hide_footer %}
 {% block content %}
 
-<body id="dashboard">
+<body class="bg">
 <div class="wrapper">
   <div class="d-flex flex-wrap">
+    <div class="card job-card details scroll">
+        <h1>Jobs late/due today:</h1>
+        <hr>
+        {% for i in due_late_jobs %}
+            {% if i.status.startswith('Dispatched') %}
+            {% else %}
+            <a href="/edit/{{ i.id }}">
+                <div class="job_name">
+                    <h3>{{ i.job_no }} - {{ i.job_name }}</h3>
+                </div>
+            </a>
+            {% endif %}
+        {% endfor %}
+        <h1>Dispatched jobs:</h1>
+        <hr>
+        {% for i in due_late_jobs %}
+        {% if i.status.startswith('Dispatched') %}
+            <a href="/status/{{ i.id }}" onclick="return confirm('Are you sure you want to remove this delivered job?')">
+            <div class="job_name">
+                <h3>{{ i.job_no }} - {{ i.job_name }}</h3>
+            </div>
+            </a>
+        {% else %}
+        {% endif %}
+        {% endfor %}
+    </div>
     {% for i in all_jobs %}
+    {% if i.status.startswith('Dispatched') %}
+    {% else %}
     <div class="card job-card
     {% if i.status.startswith('Proof') %} approved
     {% elif i.status.startswith('Dispatched') %} dispatched
@@ -31,25 +59,28 @@
             <i class="material-check bi bi-check-circle" style="color:limegreen;"></i>
           </div>
           <div class="material-hide">
-            <p>Materials have been ordered.</p>
+            <p>Materials have been ordered</p>
           </div>
           {% else %}
           <div class="material-div">
             <i class="material-check bi bi-circle" style="color:orangered;"></i>
           </div>
           <div class="material-hide">
-            <p>Materials have not been ordered.</p>
+            <p>Materials have not been ordered</p>
           </div>
         {% endif %}
+        <div class="timesheet-div">
+            <a href="/timesheet-job/{{ i.id }}">
+                <i class="timesheet bi bi-clock"></i>
+            </a>
+        </div>
+        <div class="timesheet-hide">
+            <p>Post timesheet</p>
+        </div>
         <h4>Value: ${{ i.job_value }}</h4>
         <h4>Quantity: {{ i.quantity }}</h4>
         <h4>Due date: {{ i.due_date | datefilter }}</h4>
-        {% if i.status.startswith('Dispatched') %}
-        <a href="/status/{{ i.id }}" onclick="return confirm('Are you sure you want to remove this delivered job?')">
-          {% else %}
-          <a href="/status/{{ i.id }}">
-            {% endif %}
-            {{ i.status }}
+        {{ i.status }}
           </a><br>
           {% if all == False %}
           {% if i.notes %}
@@ -58,6 +89,7 @@
           {% endif %}
       </div>
     </div>
+    {% endif %}
     {% endfor %}
   </div>
 
@@ -153,4 +185,6 @@
       }
     }
   </script>
+
+
   {% endblock %}
