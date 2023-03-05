@@ -211,7 +211,7 @@ def add_quote():
     if auth(user=current_user.id, action="added quote", job=last_id_plus_one, name='') >= 3:
         if request.method == "GET":
             return render_template("add_quote.html", logged_in=current_user.is_authenticated)
-        else:
+        if request.method == "POST":
             job_name = request.form["job_name"]
             due_date = request.form["due_date"]
             due_date = datetime.strptime(due_date, "%Y-%m-%d")
@@ -230,7 +230,7 @@ def add_quote():
         return redirect(url_for('home', logged_in=current_user.is_authenticated))
 
 
-@app.route("/complete_quote/<job_id>", methods=["GET", "POST"])
+@app.route("/complete_quote/<job_id>")
 @login_required
 def complete_quote(job_id):
     edit_job = Jobs.query.get(job_id)
@@ -255,7 +255,7 @@ def add_job(job_id):
                 materials=new_job.materials,
                 notes=new_job.notes,
                 logged_in=current_user.is_authenticated)
-        else:
+        if request.method == "POST":
             job_no = request.form["job_no"]
             job_value = request.form["job_value"]
             job_qty = request.form["job_qty"]
@@ -317,7 +317,7 @@ def edit(job_id):
                                    hours=hours,
                                    timesheet=timesheet,
                                    logged_in=current_user.is_authenticated)
-        else:
+        if request.method == "POST":
             current_date = time_adjusted()
             if request.form["new_due_date"] == "":
                 pass
@@ -459,7 +459,7 @@ def timesheetclock():
         return render_template('timesheet-clock.html',
                                 users=timesheet_users,
                                 logged_in=current_user.is_authenticated)
-    else:
+    if request.method == "POST":
         selected_users = request.form.getlist('select-users')
         for u in selected_users:
             uq = User.query.get(u)
@@ -486,7 +486,7 @@ def timesheetjob(job_id):
                                 job=job,
                                 users=timesheet_users,
                                 logged_in=current_user.is_authenticated)
-    else:
+    if request.method == "POST":
         selected_users = request.form.getlist('select-users')
         for u in selected_users:
             uq = User.query.get(u)
@@ -579,7 +579,7 @@ def delete(job_id):
         db.session.commit()
     else:
         flash("You are not authorized to perform this action.")
-    return redirect(url_for('home', logged_in=current_user.is_authenticated))
+        return redirect(url_for('home', logged_in=current_user.is_authenticated))
 
 
 @app.route('/new_user', methods=["GET", "POST"])
@@ -625,16 +625,30 @@ def login():
             return redirect(url_for('home', logged_in=current_user.is_authenticated))
 
 
+@app.route("/pager", methods=["GET", "POST"])
+@login_required
+def pager():
+    if auth(user=current_user.id, action="accessed page", job='', name='') >= 2:
+        if request.method == "GET":
+            return render_template("pager.html")
+        if request.method == "POST":
+            message = request.form["message"]
+            TelegramBot.send_text(f'New message from {current_user.name}: {message}')
+            return redirect(url_for('home', logged_in=current_user.is_authenticated))
+    else:
+        flash("You are not authorized to perform this action.")
+        return redirect(url_for('home', logged_in=current_user.is_authenticated))
+
+
 @app.route("/logout")
 def logout():
-    logout_user()
-    return redirect(url_for("login"))
+    return redirect(url_for("home"))
 
 
 @app.route("/admin", methods=["GET", "POST"])
 @login_required
 def admin():
-    if auth(user=current_user.id, action="accessed admin page", job='N/A', name='') >= 5:
+    if auth(user=current_user.id, action="accessed admin page", job='', name='') >= 5:
         if request.method == "GET":
             all_logs = Log.query.order_by(desc(Log.timestamp)).all()
             all_users = User.query.all()
@@ -644,7 +658,7 @@ def admin():
                                    users=all_users,
                                    timesheets=all_timesheets,
                                    logged_in=current_user.is_authenticated)
-        else:
+        if request.method == "POST":
             name = request.form["name"]
             user = db.session.query(User).filter_by(name=name).first()
             try:
