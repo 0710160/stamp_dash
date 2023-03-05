@@ -5,6 +5,11 @@
 {% block content %}
 
 <body class="bg">
+<div class="paging-div">
+    <a href="{{ url_for('pager') }}">
+        <i class="pager bi bi-telegram" style="color:dodgerblue;"></i>
+    </a>
+</div>
 <div class="wrapper">
   <div class="d-flex flex-wrap">
     <div class="card job-card details scroll">
@@ -23,14 +28,14 @@
         <h1>Dispatched jobs:</h1>
         <hr>
         {% for i in due_late_jobs %}
-        {% if i.status.startswith('Dispatched') %}
+            {% if i.status.startswith('Dispatched') %}
             <a href="/status/{{ i.id }}" onclick="return confirm('Are you sure you want to remove this delivered job?')">
-            <div class="job_name">
-                <h3>{{ i.job_no }} - {{ i.job_name }}</h3>
-            </div>
+                <div class="job_name">
+                    <h3>{{ i.job_no }} - {{ i.job_name }}</h3>
+                </div>
             </a>
-        {% else %}
-        {% endif %}
+            {% else %}
+            {% endif %}
         {% endfor %}
     </div>
     {% for i in all_jobs %}
@@ -80,13 +85,9 @@
         <h4>Value: ${{ i.job_value }}</h4>
         <h4>Quantity: {{ i.quantity }}</h4>
         <h4>Due date: {{ i.due_date | datefilter }}</h4>
-        {{ i.status }}
+          <a href="/status/{{ i.id }}">
+            {{ i.status }}
           </a><br>
-          {% if all == False %}
-          {% if i.notes %}
-          <h4>Notes: {{ i.notes }}</h4>
-          {% endif %}
-          {% endif %}
       </div>
     </div>
     {% endif %}
