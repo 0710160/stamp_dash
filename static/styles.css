@@ -405,6 +405,14 @@ div ::-webkit-scrollbar-thumb {
   max-height: 50px;
 }
 
+.pager {
+  font-size: 2.8rem;
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 3;
+}
+
 .material-check {
   font-size: 1.8rem;
   position: absolute;
@@ -484,6 +492,10 @@ TIMESHEET PAGE
     position: absolute;
     right: 3vw;
     bottom: 7vh;
+}
+
+.telegram-pager-input {
+    width: -webkit-fill-available;
 }
 
 
