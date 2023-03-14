@@ -80,6 +80,7 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(100))
     rights = db.Column(db.Integer, default=0)  # 0 is no access, 1 is read-only, 5 is admin
     active_job = db.Column(db.String(100))
+    department = db.Column(db.String(100))
     #email_preferences = db.Column(db.String)
 
 
@@ -451,10 +452,18 @@ def status_update():
         return redirect(url_for('home'))
 
 
+@app.route("/BRPprep01", methods=["GET", "POST"])
+def timesheet_prepress_user():
+    prepress_users = User.query.filter(User.department == 'prepress')
+    if request.method == "GET":
+        return render_template('brpprepuser.html',
+                                users=prepress_users)
+
+
 @app.route("/timesheet-clock", methods=["GET", "POST"])
 @login_required
 def timesheetclock():
-    timesheet_users = User.query.filter(User.rights.in_([2,5]))
+    timesheet_users = User.query.filter(User.department == 'stamp')
     if request.method == "GET":
         return render_template('timesheet-clock.html',
                                 users=timesheet_users,
@@ -480,7 +489,7 @@ def timesheetclock():
 @login_required
 def timesheetjob(job_id):
     job = Jobs.query.get(job_id)
-    timesheet_users = User.query.filter(User.rights.in_([2,5]))
+    timesheet_users = User.query.filter(User.department == 'stamp')
     if request.method == "GET":
         return render_template('timesheet-job.html',
                                 job=job,
@@ -629,12 +638,17 @@ def login():
 @login_required
 def pager():
     if auth(user=current_user.id, action="accessed page", job='', name='') >= 2:
+        '''
+        #this can load a template for a custom message rather than just sending a page
         if request.method == "GET":
             return render_template("pager.html")
         if request.method == "POST":
             message = request.form["message"]
             TelegramBot.send_text(f'New message from {current_user.name}: {message}')
             return redirect(url_for('home', logged_in=current_user.is_authenticated))
+        '''
+        TelegramBot.send_text(f'Page from {current_user.name}')
+        return redirect(url_for('home', logged_in=current_user.is_authenticated))
     else:
         flash("You are not authorized to perform this action.")
         return redirect(url_for('home', logged_in=current_user.is_authenticated))
