@@ -61,8 +61,8 @@ class Jobs(db.Model):
     job_name = db.Column(db.String(250), nullable=False)
     due_date = db.Column(db.Date)
     job_value = db.Column(db.Integer)
-    plates_made = db.Column(db.Boolean, default=False)
-    scheduled = db.Column(db.Integer, default=False)
+    plates_made = db.Column(db.Boolean, default=False) #unused
+    scheduled = db.Column(db.Integer) #don't really know what this one does
     completed = db.Column(db.Boolean, default=False)
     status = db.Column(db.String)
     notes = db.Column(db.String)
@@ -190,14 +190,9 @@ def home():
 @login_required
 def all():
     if auth(user=current_user.id, action="accessed dashboard", job='', name='') >= 1:
-        stamp_jobs = Jobs.query.order_by(Jobs.due_date).filter(Jobs.scheduled == 1)
-        outstanding_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.status == "submitted")
-        to_do_quotes = Jobs.query.order_by(Jobs.due_date).filter(Jobs.status == "todo")
-        return render_template("dashboard.html",
+        stamp_jobs = Jobs.query.order_by(Jobs.job_no.desc()).filter(Jobs.scheduled == 1)
+        return render_template("all.html",
                                all_jobs=stamp_jobs,
-                               outstanding_quotes=outstanding_quotes,
-                               to_do_quotes=to_do_quotes,
-                               all=True,
                                logged_in=current_user.is_authenticated)
     else:
         flash(f"Please register a user to view this content.\nIf you've already signed up, please wait for the administrator to approve your user.")
@@ -373,7 +368,6 @@ def edit(job_id):
                 auth(user=current_user.id, action="marked proof approved on job", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.status = f'Proof approved {current_date}'
                 mail_manager(recipients=['Stacey.McCormack@brebnerprint.co.nz', 'tim.murphy@scolour.co.nz', 'matt.tobin@brebnerprint.co.nz'], body=f'Stamp job {edit_job.job_no} \'{edit_job.job_name}\' is approved to print, and has a target dispatch date of {edit_job.due_date.strftime("%d/%m/%Y")}.')
-                edit_job.approved = True
             elif request.form['status'] == "printed":
                 auth(user=current_user.id, action="marked printed job", job=edit_job.job_no, name=edit_job.job_name)
                 edit_job.status = f'Printed {current_date}'
@@ -407,7 +401,6 @@ def status(job_id):
         elif edit_job.status.startswith("On proof"):
             edit_job.status = f"Proof approved {current_date}"
             auth(user=current_user.id, action="marked proof approved on job", job=edit_job.job_no, name=edit_job.job_name)
-            edit_job.approved = True
             mail_manager(recipients=['Stacey.McCormack@brebnerprint.co.nz', 'tim.murphy@scolour.co.nz', 'matt.tobin@brebnerprint.co.nz'], body=f'Stamp job {edit_job.job_no} \'{edit_job.job_name}\' is approved to print, and has a target dispatch date of {edit_job.due_date.strftime("%d/%m/%Y")}.')
         elif edit_job.status.startswith("Proof approved"):
             auth(user=current_user.id, action="marked printed job", job=edit_job.job_no, name=edit_job.job_name)
@@ -452,14 +445,6 @@ def status_update():
         return redirect(url_for('home'))
 
 
-@app.route("/BRPprep01", methods=["GET", "POST"])
-def timesheet_prepress_user():
-    prepress_users = User.query.filter(User.department == 'prepress')
-    if request.method == "GET":
-        return render_template('brpprepuser.html',
-                                users=prepress_users)
-
-
 @app.route("/timesheet-clock", methods=["GET", "POST"])
 @login_required
 def timesheetclock():
@@ -477,7 +462,7 @@ def timesheetclock():
                     timesheet_entry = Timesheet.query.filter_by(user=uq.id).order_by(Timesheet.id.desc()).first()
                     hours_spent = datetime.now() - timesheet_entry.timestamp
                     timesheet_entry.length = round(Decimal(timesheet_entry.length + (hours_spent.total_seconds() / 3600)),2)
-                    TelegramBot.send_text(f'{uq.name} clocked off job {uq.active_job} at {datetime.now()} for a total of {hours_spent} hours.')
+                    #TelegramBot.send_text(f'{uq.name} clocked off job {uq.active_job} at {datetime.now()} for a total of {hours_spent} hours.')
                     uq.active_job = ""
                     db.session.commit()
             except:
@@ -504,12 +489,12 @@ def timesheetjob(job_id):
                 hours_spent = datetime.now() - timesheet_entry.timestamp
                 timesheet_entry.length = round(Decimal(timesheet_entry.length + (hours_spent.total_seconds() / 3600)),2)
                 db.session.commit()
-                TelegramBot.send_text(f'{uq.name} clocked off job {job.job_no} at {datetime.now()} for a total of {hours_spent} hours.')
+                #TelegramBot.send_text(f'{uq.name} clocked off job {job.job_no} at {datetime.now()} for a total of {hours_spent} hours.')
             timesheet_entry = Timesheet(user=uq.id,
                                         timestamp=datetime.now(),
                                         job_no=job.job_no)
-            TelegramBot.send_text(f'{uq.name} started job {job.job_no} at {datetime.now()}')
-            TelegramBot.send_text(f'{datetime.now()} {timesheet_entry.timestamp}')
+            #TelegramBot.send_text(f'{uq.name} started job {job.job_no} at {datetime.now()}')
+            #TelegramBot.send_text(f'{datetime.now()} {timesheet_entry.timestamp}')
             db.session.add(timesheet_entry)
             uq.active_job = job.job_no
             db.session.commit()
@@ -586,12 +571,13 @@ def delete(job_id):
             pass
         db.session.delete(delete_job)
         db.session.commit()
+        return redirect(url_for('home'))
     else:
         flash("You are not authorized to perform this action.")
         return redirect(url_for('home', logged_in=current_user.is_authenticated))
 
 
-@app.route('/new_user', methods=["GET", "POST"])
+@app.route('/Llj882hefgoo49wguih24ht438udgriu', methods=["GET", "POST"])
 def new_user():
     if request.method == "GET":
         return render_template("new_user.html")
@@ -680,6 +666,11 @@ def admin():
                 user.rights = rights
             except ValueError:
                 pass
+            if request.form["department"] == "":
+                pass
+            else:
+                department = request.form["department"]
+                user.department = department
             if request.form["password"] == "":
                 pass
             else:
